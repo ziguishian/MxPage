@@ -103,6 +103,8 @@
 * 请求时才发送到服务端，不写入服务端数据库
 * 支持服务端锁定 `baseURL`，适合团队或私有化部署
 
+Atlas Cloud 也可作为可选 Provider：将 `baseURL` 设为 `https://api.atlascloud.ai/v1`，填入 API Key 后即可从实时目录选择文本或图像模型。图像任务会单次提交并轮询结果；使用参考图时，请选择带 `/edit` 的编辑模型。现有默认 Provider 不受影响。
+
 ### 图片生成与编辑
 
 * 优先支持 `gpt-image-2`

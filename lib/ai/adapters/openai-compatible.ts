@@ -16,6 +16,49 @@ function normalizeBaseUrl(baseUrl: string) {
   return baseUrl.replace(/\/+$/, "");
 }
 
+function isAtlasCloudBaseUrl(baseUrl: string) {
+  try {
+    return new URL(normalizeBaseUrl(baseUrl)).hostname.toLowerCase() === "api.atlascloud.ai";
+  } catch {
+    return false;
+  }
+}
+
+function atlasCloudApiBaseUrl(baseUrl: string) {
+  return `${new URL(normalizeBaseUrl(baseUrl)).origin}/api/v1`;
+}
+
+function resolveAtlasCloudImageSize(input: { aspectRatio?: "1:1" | "3:4" | "9:16"; size?: string }) {
+  if (input.size && /^\d+\*\d+$/.test(input.size)) {
+    return input.size;
+  }
+
+  switch (input.aspectRatio ?? sizeToAspectRatio(input.size)) {
+    case "1:1":
+      return "2048*2048";
+    case "3:4":
+      return "1728*2304";
+    default:
+      return "1600*2848";
+  }
+}
+
+function extractAtlasCloudImageResult(payload: unknown): ImageGenerationResult {
+  const output = (payload as { outputs?: unknown[] })?.outputs?.[0];
+  const url =
+    typeof output === "string"
+      ? output
+      : output && typeof output === "object" && "url" in output && typeof output.url === "string"
+        ? output.url
+        : null;
+
+  if (!url) {
+    throw new Error("Atlas Cloud image generation returned no output URL.");
+  }
+
+  return { url, b64Json: null, revisedPrompt: null };
+}
+
 function hasOpenAiVersionSuffix(baseUrl: string) {
   return /\/v\d+(?:beta)?$/i.test(normalizeBaseUrl(baseUrl));
 }
@@ -957,6 +1000,14 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
   }
 
   async testConnection() {
+    if (isAtlasCloudBaseUrl(this.baseUrl)) {
+      await this.fetchAtlasCloudModels();
+      return {
+        ok: true,
+        providerLabel: normalizeBaseUrl(this.baseUrl),
+      };
+    }
+
     await this.requestJson<{ data?: unknown[] }>("/models", { method: "GET" });
     return {
       ok: true,
@@ -965,6 +1016,19 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
   }
 
   async listModels() {
+    if (isAtlasCloudBaseUrl(this.baseUrl)) {
+      const payload = await this.fetchAtlasCloudModels();
+      return (payload.data ?? [])
+        .filter((item) => item.display_console === true && (item.type === "Text" || item.type === "Image"))
+        .map((item) => ({
+          id: item.model,
+          label: item.displayName ?? item.model,
+          type: item.type ?? null,
+          category: item.categories?.[0] ?? item.type ?? null,
+          modalities: item.type === "Image" ? ["image"] : ["text"],
+        }));
+    }
+
     const payload = await this.requestJson<{ data?: Array<Record<string, unknown> & { id: string; label?: string; name?: string }> }>("/models", {
       method: "GET",
     });
@@ -1021,6 +1085,88 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
         error instanceof Error ? error.message : "Unknown structured parse error",
       );
     }
+  }
+
+  private async fetchAtlasCloudModels() {
+    const response = await this.fetchRaw(`${atlasCloudApiBaseUrl(this.baseUrl)}/models`, { method: "GET" });
+    if (!response.ok) {
+      throw new Error(`Atlas Cloud model discovery failed (${response.status}): ${response.body}`);
+    }
+
+    return JSON.parse(response.body) as {
+      data?: Array<{
+        model: string;
+        displayName?: string;
+        type?: string;
+        categories?: string[];
+        display_console?: boolean;
+      }>;
+    };
+  }
+
+  private async generateAtlasCloudImage(input: {
+    model: string;
+    prompt: string;
+    images?: string[];
+    size?: string;
+    aspectRatio?: "1:1" | "3:4" | "9:16";
+    timeoutMs?: number;
+    monitor?: AiMonitorContext;
+    signal?: AbortSignal;
+  }) {
+    const apiBaseUrl = atlasCloudApiBaseUrl(this.baseUrl);
+    const body = {
+      model: input.model,
+      prompt: input.prompt,
+      size: resolveAtlasCloudImageSize(input),
+      output_format: "png",
+      ...(input.images?.length ? { images: input.images.slice(0, 14) } : {}),
+    };
+    const submission = await this.fetchRaw(
+      `${apiBaseUrl}/model/generateImage`,
+      { method: "POST", body: JSON.stringify(body), signal: input.signal },
+      undefined,
+      input.timeoutMs ?? 120000,
+      input.monitor,
+    );
+    if (!submission.ok) {
+      throw new Error(`Atlas Cloud image submission failed (${submission.status}): ${submission.body}`);
+    }
+
+    const submissionPayload = JSON.parse(submission.body) as { data?: { id?: string }; id?: string };
+    const predictionId = submissionPayload.data?.id ?? submissionPayload.id;
+    if (!predictionId) {
+      throw new Error("Atlas Cloud image submission returned no prediction ID.");
+    }
+
+    const deadline = Date.now() + (input.timeoutMs ?? 120000);
+    while (Date.now() < deadline) {
+      if (input.signal?.aborted) {
+        throw new Error("Task canceled.");
+      }
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      const prediction = await this.fetchRaw(
+        `${apiBaseUrl}/model/prediction/${encodeURIComponent(predictionId)}`,
+        { method: "GET", signal: input.signal },
+        undefined,
+        15000,
+        input.monitor,
+      );
+      if (!prediction.ok) {
+        throw new Error(`Atlas Cloud prediction polling failed (${prediction.status}): ${prediction.body}`);
+      }
+
+      const payload = JSON.parse(prediction.body) as { data?: { status?: string; outputs?: unknown[]; error?: unknown }; status?: string; outputs?: unknown[]; error?: unknown };
+      const result = payload.data ?? payload;
+      if (result.status === "completed" || result.status === "succeeded") {
+        return extractAtlasCloudImageResult(result);
+      }
+      if (result.status === "failed" || result.status === "canceled") {
+        throw new Error(`Atlas Cloud image generation ${result.status}: ${JSON.stringify(result.error ?? "Unknown error")}`);
+      }
+    }
+
+    throw new Error("Atlas Cloud image generation timed out.");
   }
 
   private async generateGeminiImageWithGoogleProtocol(input: {
@@ -1094,6 +1240,13 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
   }
 
   async generateImage(input: ImageGenerationRequest): Promise<ImageGenerationResult> {
+    if (isAtlasCloudBaseUrl(this.baseUrl)) {
+      return this.generateAtlasCloudImage({
+        ...input,
+        images: input.referenceImages,
+      });
+    }
+
     const referenceImages = input.referenceImages ?? [];
     let googleProtocolError: unknown = null;
 
@@ -1230,6 +1383,16 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
   }
 
   async editImage(input: ImageEditRequest): Promise<ImageGenerationResult> {
+    if (isAtlasCloudBaseUrl(this.baseUrl)) {
+      if (input.mask) {
+        throw new Error("Atlas Cloud image editing does not support masks.");
+      }
+      return this.generateAtlasCloudImage({
+        ...input,
+        images: [input.image, ...(input.referenceImages ?? [])],
+      });
+    }
+
     const imageRefs = toImageRefs([input.image, ...(input.referenceImages ?? [])]);
     let googleProtocolError: unknown = null;
     if (isGeminiImageModel(input.model)) {
