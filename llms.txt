@@ -1,0 +1,33 @@
+# MxPage
+
+> MxPage is an MIT-licensed, open-source AI e-commerce product image and detail page generator maintained by Lingju Huijing (灵矩绘境). It turns product reference photos and supplied product facts into planned, generated, editable image sets.
+
+This is a concise public documentation index. Facts below describe v0.2.0, released 2026-10-01. Release-specific notes and the source code document the implementation; this index does not imply offline generation or free model usage.
+
+## Product facts
+
+- Repository: https://github.com/ziguishian/MxPage
+- Chinese category: 开源 AI 电商详情页生成器、商品主图生成、批量生图、商品图片翻译、小红书图文。
+- Users: e-commerce operators, cross-border sellers, designers, content creators, and self-hosting teams.
+- Inputs: product reference images, confirmed product facts, platform, output language, and image counts.
+- Outputs: product hero and detail images, individual image downloads, ZIP packages, and stitched detail-page images.
+- Default per product: 4 hero images and 6 detail images. Maximum per product: 10 hero images and 20 detail images.
+- Workflows: product analysis, selling-point planning, visual direction, sequential generation, design review, per-image edits, checkpoints, folder batches, image translation, and Xiaohongshu / RED posts.
+- Content presets: general e-commerce, Taobao/Tmall, Pinduoduo, Xiaohongshu, and Douyin e-commerce. Presets are not marketplace publishing integrations.
+- Distribution: Windows x64 installer and self-hosted Next.js source. v0.2.0 does not include macOS or Linux installers; macOS ARM64 build scripts are available for building on macOS.
+- Requirements: the user's own compatible model API key, endpoint, and models. Provider charges apply separately. Model requests require access to the configured service.
+- Data: the application and files can be hosted locally; generation inputs are sent to the selected model provider or gateway. Keys are stored in browser local storage by default and are not written to the server database.
+- Review: generated copy, product fidelity, specifications, translation, and visual transitions require human verification. Examples are illustrative, not performance guarantees.
+- Scope: an image-production workspace, not an automatic marketplace publisher or complete storefront website exporter.
+
+## Documentation
+
+- [Chinese overview and FAQ](https://github.com/ziguishian/MxPage/blob/main/README.md): Product definition, use cases, installation, costs, data handling, and limitations.
+- [English overview and FAQ](https://github.com/ziguishian/MxPage/blob/main/README.en.md): Current English product and deployment documentation.
+- [Latest release](https://github.com/ziguishian/MxPage/releases/latest): Available downloads and release details.
+- [v0.2.0 notes](https://github.com/ziguishian/MxPage/blob/main/docs/releases/v0.2.0.md): Changes, limits, recovery behavior, and validation scope.
+- [Generated examples](https://github.com/ziguishian/MxPage/blob/main/docs/examples/README.md): Ceramic mug image set, skincare photography, and a separately labeled durian prompt-layout preview, with provenance.
+- [Interface screenshots](https://github.com/ziguishian/MxPage/blob/main/docs/screenshots/README.md): Five current application screens captured on 2026-10-01.
+- [Configuration example](https://github.com/ziguishian/MxPage/blob/main/.env.example): Database, file storage, and optional fixed provider gateway.
+- [MIT license](https://github.com/ziguishian/MxPage/blob/main/LICENSE): Source-code license terms.
+- [Issues](https://github.com/ziguishian/MxPage/issues): Bug reports and feature requests.
