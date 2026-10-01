@@ -87,11 +87,32 @@
 
 ### 界面预览
 
-<img width="3840" height="2126" alt="MxPage Preview 1" src="https://github.com/user-attachments/assets/68f49a9f-875f-4397-ade6-426df6337134" />
+以下为 **v0.2.0 当前界面实拍**（2026-10-01），截图随仓库保存。
 
-<img width="3840" height="2126" alt="MxPage Preview 2" src="https://github.com/user-attachments/assets/95ff74e2-4b32-4f48-9d40-e1b26da1dcfa" />
+**单商品入口**：上传商品参考图，进入商品理解与整套页面生成。
 
-<img width="3840" height="2029" alt="MxPage Preview 3" src="https://github.com/user-attachments/assets/aadadb16-ed6e-4eab-8003-288b687339f6" />
+![MxPage 单商品上传首页](docs/screenshots/home.jpg)
+
+**成品工作台**：以实际生成的陶瓷杯案例展示手机预览、逐图修改、设计检查反馈与历史版本。
+
+![MxPage 成品工作台与手机预览](docs/screenshots/editor-phone.jpg)
+
+**文件夹批量生成**：统一设置平台、语言、画质和每套图片数量，按商品逐套处理。截图显示默认的 4 张头图 + 6 张详情图，可分别调至 10 张和 20 张。
+
+![MxPage 文件夹批量生成配置](docs/screenshots/batch.jpg)
+
+<details>
+<summary>查看详情翻译与小红书创作界面</summary>
+
+**详情页翻译**：支持单张、多张及文件夹上传，选择目标语言后生成翻译图片。
+
+![MxPage 多语言详情页翻译](docs/screenshots/translation.jpg)
+
+**小红书图文**：输入创作方向并按需添加参考图，一键生成整篇图文。
+
+![MxPage 小红书图文创作](docs/screenshots/xiaohongshu.jpg)
+
+</details>
 
 ---
 
