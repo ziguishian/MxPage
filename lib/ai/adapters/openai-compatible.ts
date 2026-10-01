@@ -359,6 +359,13 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
     },
   ) {
     const controller = new AbortController();
+    const externalSignal = init?.signal;
+    const abortFromExternalSignal = () => controller.abort(externalSignal?.reason);
+    if (externalSignal?.aborted) {
+      abortFromExternalSignal();
+    } else {
+      externalSignal?.addEventListener("abort", abortFromExternalSignal, { once: true });
+    }
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
     const startedAt = Date.now();
     const method = init?.method ?? "GET";
@@ -426,12 +433,16 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
       }
 
       if ((error as Error)?.name === "AbortError") {
+        if (externalSignal?.aborted) {
+          throw new Error("Task canceled.");
+        }
         throw new Error(`Provider request timed out after ${timeoutMs}ms: ${url}`);
       }
 
       throw error;
     } finally {
       clearTimeout(timeout);
+      externalSignal?.removeEventListener("abort", abortFromExternalSignal);
     }
   }
 
@@ -580,12 +591,13 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
     body: Record<string, unknown>,
     timeoutMs?: number,
     monitor?: AiMonitorContext,
-    options?: { suppressUsageLog?: boolean },
+    options?: { suppressUsageLog?: boolean; signal?: AbortSignal },
   ) {
     try {
       return await this.requestJson<T>("/chat/completions", {
         method: "POST",
         body: JSON.stringify(body),
+        signal: options?.signal,
       }, timeoutMs, monitor, options);
     } catch (error) {
       if (!("temperature" in body) || !isUnsupportedTemperatureError(error)) {
@@ -595,6 +607,7 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
       return this.requestJson<T>("/chat/completions", {
         method: "POST",
         body: JSON.stringify(omitTemperature(body)),
+        signal: options?.signal,
       }, timeoutMs, monitor, options);
     }
   }
@@ -606,6 +619,7 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
       imageFieldName?: "image" | "image[]";
       timeoutMs?: number;
       monitor?: AiMonitorContext;
+      signal?: AbortSignal;
     },
   ) {
     const form = new FormData();
@@ -626,6 +640,7 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
       {
         method: "POST",
         body: form,
+        signal: options?.signal,
       },
       options?.timeoutMs,
       options?.monitor,
@@ -638,7 +653,13 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
     return JSON.parse(response.body) as T;
   }
 
-  private async requestGoogleJson<T>(path: string, body: unknown, timeoutMs = 45000, monitor?: AiMonitorContext) {
+  private async requestGoogleJson<T>(
+    path: string,
+    body: unknown,
+    timeoutMs = 45000,
+    monitor?: AiMonitorContext,
+    signal?: AbortSignal,
+  ) {
     const base = deriveGoogleBaseUrl(this.baseUrl);
     const attempts = [
       `${base}/v1${path}`,
@@ -664,6 +685,7 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
           {
             method: "POST",
             body: JSON.stringify(body),
+            signal,
           },
           {
             "x-goog-api-key": this.apiKey,
@@ -791,7 +813,7 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
       ),
       Math.min(input.timeoutMs ?? 60000, 45000),
       input.monitor,
-      { suppressUsageLog: input.suppressUsageLog },
+      { suppressUsageLog: input.suppressUsageLog, signal: input.signal },
     );
 
     const repairedRaw = extractTextContent(payload);
@@ -975,7 +997,7 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
       }, 0.4),
       input.timeoutMs ?? 60000,
       input.monitor,
-      { suppressUsageLog: input.suppressUsageLog },
+      { suppressUsageLog: input.suppressUsageLog, signal: input.signal },
     );
 
     return {
@@ -992,7 +1014,7 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
       }, 0.2),
       input.timeoutMs ?? 60000,
       input.monitor,
-      { suppressUsageLog: input.suppressUsageLog },
+      { suppressUsageLog: input.suppressUsageLog, signal: input.signal },
     );
 
     const raw = extractTextContent(payload);
@@ -1017,6 +1039,7 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
     size?: string;
     aspectRatio?: "1:1" | "3:4" | "9:16";
     monitor?: AiMonitorContext;
+    signal?: AbortSignal;
   }) {
     const imageParts = [input.baseImage ?? null, ...(input.referenceImages ?? [])]
       .filter(Boolean)
@@ -1036,7 +1059,7 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
           aspectRatio: resolveAspectRatio(input),
         },
       },
-    }, 90000, input.monitor);
+    }, 90000, input.monitor, input.signal);
 
     return extractGoogleImageResult(payload);
   }
@@ -1049,6 +1072,7 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
     aspectRatio?: "1:1" | "3:4" | "9:16";
     timeoutMs?: number;
     monitor?: AiMonitorContext;
+    signal?: AbortSignal;
   }) {
     const fields = {
       model: input.model,
@@ -1065,6 +1089,7 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
           imageFieldName,
           timeoutMs: input.timeoutMs ?? 120000,
           monitor: input.monitor,
+          signal: input.signal,
         });
 
         return extractImageResult(payload);
@@ -1104,6 +1129,7 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
           size: input.size,
           aspectRatio: input.aspectRatio,
           monitor: input.monitor,
+          signal: input.signal,
         });
       } catch (error) {
         googleProtocolError = error;
@@ -1129,6 +1155,7 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
             aspectRatio: input.aspectRatio,
             timeoutMs: input.timeoutMs,
             monitor: input.monitor,
+            signal: input.signal,
           });
         } catch (error) {
           const message = error instanceof Error ? error.message : "Unknown GPT Image reference generation error";
@@ -1183,6 +1210,7 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
           }>(attempt.path, {
             method: "POST",
             body: JSON.stringify(attempt.body),
+            signal: input.signal,
           }, input.timeoutMs ?? 120000, input.monitor);
 
           return extractImageResult(payload);
@@ -1204,6 +1232,7 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
           prompt: input.prompt,
           size: resolveOpenAiSize(input),
         }),
+        signal: input.signal,
       }, input.timeoutMs ?? 120000, input.monitor);
 
       return extractImageResult(payload);
@@ -1218,6 +1247,7 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
         size: input.size,
         aspectRatio: input.aspectRatio,
         monitor: input.monitor,
+        signal: input.signal,
       });
     }
   }
@@ -1235,6 +1265,7 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
           size: input.size,
           aspectRatio: input.aspectRatio,
           monitor: input.monitor,
+          signal: input.signal,
         });
       } catch (error) {
         googleProtocolError = error;
@@ -1252,6 +1283,7 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
           aspectRatio: input.aspectRatio,
           timeoutMs: input.timeoutMs,
           monitor: input.monitor,
+          signal: input.signal,
         });
       } catch {
         // Fall through to JSON compatibility attempts for third-party gateways.
@@ -1301,6 +1333,7 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
         }>(attempt.path, {
           method: "POST",
           body: JSON.stringify(attempt.body),
+          signal: input.signal,
         }, input.timeoutMs ?? 120000, input.monitor);
 
         return extractImageResult(payload);

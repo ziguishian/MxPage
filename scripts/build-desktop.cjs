@@ -83,6 +83,11 @@ async function prepareStandaloneBundle() {
     throw new Error("Next standalone server.js was not generated. Please verify next.config.mjs output settings.");
   }
 
+  // Next can trace local environment files; desktop settings must come from userData.
+  for (const name of await fsp.readdir(standaloneRoot)) {
+    if (name.startsWith(".env")) await removePath(path.join(standaloneRoot, name));
+  }
+
   await removePath(path.join(standaloneRoot, ".next", "static"));
   await removePath(path.join(standaloneRoot, desktopDistDirName, "static"));
   await removePath(path.join(standaloneRoot, "public"));

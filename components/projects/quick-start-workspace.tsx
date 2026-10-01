@@ -50,6 +50,15 @@ export function QuickStartWorkspace() {
     }
     setFiles(next);
   }
+  useEffect(() => {
+    const onPaste = (event: ClipboardEvent) => {
+      if (uploadDisabled || (event.target instanceof Element && event.target.closest('input, textarea, [contenteditable="true"]'))) return;
+      const images = Array.from(event.clipboardData?.files || []).filter(file => file.type.startsWith("image/"));
+      if (images.length) { event.preventDefault(); addFiles(images); }
+    };
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, [files, uploadDisabled]);
   const dropHandlers = {
     onDragEnter(event: DragEvent<HTMLDivElement>) {
       if (!event.dataTransfer.types.includes("Files")) return;
@@ -90,7 +99,7 @@ export function QuickStartWorkspace() {
         await payload(await fetch(`/api/projects/${project.id}/assets/upload`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: index === 0 ? "MAIN" : "ANGLE", ...await fileToBase64Payload(file) }) }));
         uploaded.current = index + 1;
       }
-      
+
       router.push(`/projects/${project.id}/configure`);
     } catch (error) { toast.error(error instanceof Error ? error.message : "创建失败"); }
     finally { pending.current = false; setBusy(false); setStage(""); }

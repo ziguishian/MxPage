@@ -1,3 +1,4 @@
+import { HERO_MAX, DETAIL_MAX } from "@/lib/utils/image-counts";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { assetTypeLabels, sectionTypeLabels } from "@/types/domain";
@@ -5,8 +6,8 @@ import { assetTypeLabels, sectionTypeLabels } from "@/types/domain";
 function getPreviewConfig(project: any) {
   const config = project?.modelSnapshot?.previewConfig ?? {};
   return {
-    heroImageCount: Math.min(5, Math.max(3, Number(config.heroImageCount ?? 4))),
-    detailSectionCount: Math.min(10, Math.max(4, Number(config.detailSectionCount ?? 6))),
+    heroImageCount: Math.min(HERO_MAX, Math.max(1, Number(config.heroImageCount ?? 4))),
+    detailSectionCount: Math.min(DETAIL_MAX, Math.max(1, Number(config.detailSectionCount ?? 6))),
   };
 }
 

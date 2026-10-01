@@ -10,6 +10,7 @@ import { ThemeScript } from "@/components/layout/theme-script";
 import { BackToTopButton } from "@/components/shared/back-to-top-button";
 import { BrandConsole } from "@/components/shared/brand-console";
 import { ChunkReloadGuard } from "@/components/shared/chunk-reload-guard";
+import { ImagePreviewProvider } from "@/components/shared/image-preview-provider";
 
 export const metadata: Metadata = {
   title: "MxPage",
@@ -33,8 +34,10 @@ export default function RootLayout({
         <ChunkReloadGuard />
         <BrandConsole />
         <ProviderCredentialFetchBridge />
-        <AppShell>{children}</AppShell>
-        <BackToTopButton />
+        <ImagePreviewProvider>
+          <AppShell>{children}</AppShell>
+          <BackToTopButton />
+        </ImagePreviewProvider>
         <ThemeToaster />
       </body>
     </html>

@@ -19,7 +19,7 @@ let isQuitting = false;
 function getWindowIcon() {
   return app.isPackaged
     ? path.join(process.resourcesPath, "icon.ico")
-    : path.join(__dirname, "../build/icon.ico");
+    : path.join(__dirname, "../public/brand-icon.ico");
 }
 
 function getStandaloneRoot() {

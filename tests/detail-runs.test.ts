@@ -439,6 +439,21 @@ test("official SDK detail workflow: images, idempotency, questions, recovery, ca
       const image = await exportLongImage(p.id); const meta = await sharp(image).metadata();
       assert.equal(meta.width, 1080); assert.equal(meta.height, 5760);
     });
+    await t.test("maximum 10 plus 20 workflow saves every image, seam and resumable slot", async () => {
+      const p = await project(), before = imageRequests;
+      await inCredentials(() => createDetailRun(p.id, { ...input, heroCount: 10, detailCount: 20 }, credentials));
+      const done = await settled(p.id), cp = done.checkpoint as any;
+      assert.equal(done.status, "COMPLETED", JSON.stringify(done));
+      assert.equal(imageRequests - before, 30);
+      assert.equal(cp.images.length, 30);
+      assert.equal(cp.artDirection.detailSeams.length, 19);
+      assert.equal(await prisma.pageSection.count({ where: { projectId: p.id, type: "HERO" } }), 10);
+      assert.equal(await prisma.sectionVersion.count({ where: { section: { projectId: p.id } } }), 30);
+      const { getProjectDetail } = await import("../lib/services/project-service");
+      const saved = await getProjectDetail(p.id);
+      assert.equal((saved!.modelSnapshot as any).previewConfig.detailSectionCount, 20);
+      assert.equal(saved!.sections.length, 30);
+    });
     await t.test("a disconnected planning request retries without replaying prior tools or images", async () => {
       const p = await project(), before = imageRequests; disconnectPlanner = 1;
       try {

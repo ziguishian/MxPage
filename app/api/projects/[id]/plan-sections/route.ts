@@ -1,5 +1,5 @@
 ﻿import { NextRequest } from "next/server";
-import { HERO_MIN, HERO_MAX, DETAIL_MIN, DETAIL_MAX } from "@/lib/utils/image-counts";
+import { HERO_MAX, DETAIL_MAX } from "@/lib/utils/image-counts";
 import { z } from "zod";
 
 import { planSections } from "@/lib/services/planner-service";
@@ -12,8 +12,8 @@ const planRequestSchema = z.object({
   autoDecideCounts: z.boolean().optional(),
   previewConfig: z
     .object({
-      heroImageCount: z.number().int().min(HERO_MIN).max(HERO_MAX),
-      detailSectionCount: z.number().int().min(DETAIL_MIN).max(DETAIL_MAX),
+      heroImageCount: z.number().int().min(1).max(HERO_MAX),
+      detailSectionCount: z.number().int().min(1).max(DETAIL_MAX),
       imageAspectRatio: z.enum(["3:4", "9:16"]),
       contentLanguage: z.enum(contentLanguageOptions),
     })

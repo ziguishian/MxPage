@@ -5,9 +5,10 @@ import { Select } from "@/components/ui/select";
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { CopyPlus, History, Loader2, LockKeyhole, PlugZap } from "lucide-react";
+import { AlertTriangle, ChevronsUpDown, CopyPlus, History, Loader2, LockKeyhole, PlugZap, Trash2 } from "lucide-react";
 
 import { CLIENT_PROVIDER_STORAGE_KEY } from "@/components/layout/provider-credential-fetch-bridge";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -267,7 +268,8 @@ export function ProviderSettings({ initialProviders, runtimeConfig }: ProviderSe
     () => providers.find((item) => item.id === selectedProviderId) ?? activeProvider,
     [providers, selectedProviderId, activeProvider],
   );
-  const [loading, setLoading] = useState<null | "configure" | "saveAsNew" | "activate">(null);
+  const [loading, setLoading] = useState<null | "configure" | "saveAsNew" | "activate" | "delete">(null);
+  const [deleteTargetId, setDeleteTargetId] = useState("");
   const [models, setModels] = useState<Array<GenericModelRecord>>(selectedProvider?.models ?? []);
   const [defaults, setDefaults] = useState<DefaultAssignments>(buildDefaults(selectedProvider ?? null));
   const [form, setForm] = useState({
@@ -358,6 +360,26 @@ export function ProviderSettings({ initialProviders, runtimeConfig }: ProviderSe
     }
   }
 
+  async function handleDeleteProvider() {
+    if (!deleteTargetId) return;
+
+    setLoading("delete");
+    try {
+      const response = await fetch(`/api/providers?id=${encodeURIComponent(deleteTargetId)}`, {
+        method: "DELETE",
+      });
+      const payload = await response.json();
+      if (!payload.success) throw new Error(payload.error?.message ?? "删除历史服务失败");
+      hydrateFromProviderPayload(payload.data);
+      setDeleteTargetId("");
+      toast.success("已删除历史服务快照");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "删除历史服务失败");
+    } finally {
+      setLoading(null);
+    }
+  }
+
   async function testProviderConnection(values: ProviderSubmitValues) {
     const response = await fetch("/api/providers/test", {
       method: "POST",
@@ -440,7 +462,10 @@ export function ProviderSettings({ initialProviders, runtimeConfig }: ProviderSe
     toast.success("已按 GPT 优先和模型能力自动填充默认模型");
   }
 
+  const deleteTargetProvider = providers.find((provider) => provider.id === deleteTargetId) ?? null;
+
   return (
+    <>
     <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
       <Card>
         <CardHeader>
@@ -490,13 +515,29 @@ export function ProviderSettings({ initialProviders, runtimeConfig }: ProviderSe
             </div>
             {selectedProvider ? (
               <div className="rounded-2xl border border-border bg-background p-4 dark:bg-black/20">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-medium">{selectedProvider.name}</p>
-                  {selectedProvider.isActive ? <Badge variant="success">当前服务</Badge> : null}
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-medium">{selectedProvider.name}</p>
+                      {selectedProvider.isActive ? <Badge variant="success">当前服务</Badge> : null}
+                    </div>
+                    <p className="mt-2 text-sm text-muted-foreground">{selectedProvider.baseUrl}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Key：仅保存在当前浏览器</p>
+                    <p className="mt-1 text-xs text-muted-foreground">最近更新：{formatTimeLabel(selectedProvider.updatedAt)}</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="shrink-0 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-300 dark:hover:bg-rose-500/10 dark:hover:text-rose-200"
+                    onClick={() => setDeleteTargetId(selectedProvider.id)}
+                    disabled={loading !== null}
+                    title="删除历史服务快照"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    删除
+                  </Button>
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground">{selectedProvider.baseUrl}</p>
-                <p className="mt-1 text-xs text-muted-foreground">Key：仅保存在当前浏览器</p>
-                <p className="mt-1 text-xs text-muted-foreground">最近更新：{formatTimeLabel(selectedProvider.updatedAt)}</p>
               </div>
             ) : (
               <div className="rounded-2xl border border-dashed border-border p-4 text-sm text-muted-foreground">首次使用时，请填写 API Key 并发现模型。</div>
@@ -608,5 +649,23 @@ export function ProviderSettings({ initialProviders, runtimeConfig }: ProviderSe
         </CardContent>
       </Card>
     </div>
+    <ConfirmDialog
+      open={Boolean(deleteTargetProvider)}
+      title="删除历史服务快照？"
+      description={
+        deleteTargetProvider
+          ? `将删除「${deleteTargetProvider.name}」及其模型快照记录。删除当前服务后，系统会自动切换到剩余最近更新的服务。`
+          : undefined
+      }
+      confirmText="删除快照"
+      destructive
+      loading={loading === "delete"}
+      icon={<AlertTriangle className="h-5 w-5" />}
+      onCancel={() => {
+        if (loading !== "delete") setDeleteTargetId("");
+      }}
+      onConfirm={handleDeleteProvider}
+    />
+    </>
   );
 }

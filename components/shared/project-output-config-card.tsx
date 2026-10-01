@@ -1,6 +1,6 @@
 "use client";
 
-import { HERO_MIN, HERO_MAX, DETAIL_MIN, DETAIL_MAX, heroCountOptions, detailCountOptions } from "@/lib/utils/image-counts";
+import { HERO_MAX, DETAIL_MAX, legacyHeroCountOptions, legacyDetailCountOptions } from "@/lib/utils/image-counts";
 import { Select } from "@/components/ui/select";
 
 
@@ -37,8 +37,8 @@ function normalizePreviewConfig(snapshot: unknown): PreviewConfig {
   const previewConfig = (data.previewConfig as Record<string, unknown> | null) ?? {};
 
   return {
-    heroImageCount: Math.min(HERO_MAX, Math.max(HERO_MIN, Number(previewConfig.heroImageCount ?? 4))),
-    detailSectionCount: Math.min(DETAIL_MAX, Math.max(DETAIL_MIN, Number(previewConfig.detailSectionCount ?? 6))),
+    heroImageCount: Math.min(HERO_MAX, Math.max(1, Number(previewConfig.heroImageCount ?? 4))),
+    detailSectionCount: Math.min(DETAIL_MAX, Math.max(1, Number(previewConfig.detailSectionCount ?? 6))),
     imageAspectRatio: previewConfig.imageAspectRatio === "3:4" ? "3:4" : "9:16",
     contentLanguage: normalizeContentLanguage(previewConfig.contentLanguage),
   };
@@ -98,15 +98,12 @@ export function ProjectOutputConfigCard({
   const saveConfig = async () => {
     try {
       setSaving(true);
-      const snapshot = ((project.modelSnapshot as Record<string, unknown> | null) ?? {}) as Record<string, unknown>;
       const response = await fetch(`/api/projects/${project.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           modelSnapshot: {
-            ...snapshot,
             previewConfig: {
-              ...((snapshot.previewConfig as Record<string, unknown> | null) ?? {}),
               heroImageCount: formState.heroImageCount,
               detailSectionCount: formState.detailSectionCount,
               imageAspectRatio: formState.imageAspectRatio,
@@ -175,11 +172,11 @@ export function ProjectOutputConfigCard({
               onValueChange={(value) =>
                 setFormState((current) => ({
                   ...current,
-                  heroImageCount: Math.min(HERO_MAX, Math.max(HERO_MIN, Number(value))),
+                  heroImageCount: Math.min(HERO_MAX, Math.max(1, Number(value))),
                 }))
               }
             >
-              {heroCountOptions.map((count) => (
+              {legacyHeroCountOptions.map((count) => (
                 <option key={count} value={count}>
                   {count} 张
                 </option>
@@ -193,11 +190,11 @@ export function ProjectOutputConfigCard({
               onValueChange={(value) =>
                 setFormState((current) => ({
                   ...current,
-                  detailSectionCount: Math.min(DETAIL_MAX, Math.max(DETAIL_MIN, Number(value))),
+                  detailSectionCount: Math.min(DETAIL_MAX, Math.max(1, Number(value))),
                 }))
               }
             >
-              {detailCountOptions.map((count) => (
+              {legacyDetailCountOptions.map((count) => (
                 <option key={count} value={count}>
                   {count} 张
                 </option>
