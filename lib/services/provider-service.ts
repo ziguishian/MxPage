@@ -76,6 +76,7 @@ type DiscoveredProviderModel = {
 };
 
 const OPENAI_TEXT_MODEL_PRESETS: DiscoveredProviderModel[] = [
+  { id: "gpt-6-luna", label: "gpt-6-luna", type: "text", category: "chat", modalities: ["text", "vision"] },
   { id: "gpt-5-mini", label: "gpt-5-mini", type: "text", category: "chat" },
   { id: "gpt-5-nano", label: "gpt-5-nano", type: "text", category: "chat" },
   { id: "gpt-4.1-mini", label: "gpt-4.1-mini", type: "text", category: "chat" },
@@ -86,6 +87,8 @@ const OPENAI_TEXT_MODEL_PRESETS: DiscoveredProviderModel[] = [
 ];
 
 const OPENAI_IMAGE_MODEL_PRESETS: DiscoveredProviderModel[] = [
+  { id: "gpt-image-2.5-sunburst", label: "gpt-image-2.5-sunburst", type: "image", category: "image" },
+  { id: "gpt-image-2.5-flare", label: "gpt-image-2.5-flare", type: "image", category: "image" },
   { id: "gpt-image-2-2026-04-21", label: "gpt-image-2-2026-04-21", type: "image", category: "image" },
   { id: "gpt-image-2", label: "gpt-image-2", type: "image", category: "image" },
   { id: "gpt-image-1.5", label: "gpt-image-1.5", type: "image", category: "image" },

@@ -1,4 +1,8 @@
-﻿"use client";
+"use client";
+
+import { HERO_MIN, HERO_MAX, DETAIL_MIN, DETAIL_MAX } from "@/lib/utils/image-counts";
+import { Select } from "@/components/ui/select";
+
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -162,8 +166,8 @@ const previewTexts: Partial<Record<
 function getPreviewConfig(project: any): PreviewConfig {
   const config = project?.modelSnapshot?.previewConfig ?? {};
   return {
-    heroImageCount: Math.min(5, Math.max(3, Number(config.heroImageCount ?? 4))),
-    detailSectionCount: Math.min(10, Math.max(4, Number(config.detailSectionCount ?? 6))),
+    heroImageCount: Math.min(HERO_MAX, Math.max(HERO_MIN, Number(config.heroImageCount ?? 4))),
+    detailSectionCount: Math.min(DETAIL_MAX, Math.max(DETAIL_MIN, Number(config.detailSectionCount ?? 6))),
     imageAspectRatio: config.imageAspectRatio === "3:4" ? "3:4" : "9:16",
     contentLanguage: normalizeContentLanguage(config.contentLanguage),
   };
@@ -699,17 +703,16 @@ export function EditorWorkspace({ project: initialProject }: EditorWorkspaceProp
 
               <div className="space-y-2">
                 <Label>类型</Label>
-                <select
-                  className="flex h-10 w-full rounded-xl border border-input bg-white px-3 text-sm"
+                <Select
                   value={String(selectedSection.type).toLowerCase()}
-                  onChange={(event) => updateSelectedSection("type", event.target.value.toUpperCase())}
+                  onValueChange={(value) => updateSelectedSection("type", value.toUpperCase())}
                 >
                   {sectionTypeOptions.map((type) => (
                     <option key={type} value={type}>
                       {sectionTypeLabels[type]}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
 
               <div className="space-y-2">
@@ -793,17 +796,16 @@ export function EditorWorkspace({ project: initialProject }: EditorWorkspaceProp
                     <Badge variant="outline">{generatedSections.length} 张</Badge>
                   </div>
                   <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto]">
-                    <select
-                      className="flex h-10 w-full rounded-xl border border-input bg-white px-3 text-sm dark:bg-white/6 dark:text-slate-100"
+                    <Select
                       value={translationTargetLanguage}
-                      onChange={(event) => setTranslationTargetLanguage(normalizeContentLanguage(event.target.value))}
+                      onValueChange={(value) => setTranslationTargetLanguage(normalizeContentLanguage(value))}
                     >
                       {contentLanguageOptions.map((language) => (
                         <option key={language} value={language}>
                           {contentLanguageLabels[language]}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                     <Button
                       type="button"
                       onClick={translateGeneratedDetailPage}

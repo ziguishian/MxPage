@@ -4,17 +4,14 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center rounded-xl text-sm font-medium transition-[transform,box-shadow,background-color,border-color,color,opacity] duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 disabled:transform-none disabled:shadow-none",
+  "inline-flex cursor-pointer items-center justify-center rounded-xl text-sm font-medium transition-[transform,box-shadow,background-color,border-color,color,opacity] duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 disabled:transform-none disabled:shadow-none",
   {
     variants: {
       variant: {
-        default:
-          "bg-[linear-gradient(180deg,rgba(24,24,27,1),rgba(10,10,10,0.96))] text-primary-foreground shadow-[0_12px_28px_-16px_rgba(0,0,0,0.36)] hover:brightness-110 hover:shadow-[0_18px_36px_-18px_rgba(0,0,0,0.34)] dark:bg-[linear-gradient(180deg,rgba(250,250,250,1),rgba(231,231,231,0.96))] dark:text-black dark:hover:brightness-[1.03]",
-        secondary:
-          "border border-slate-200 bg-slate-100/85 text-secondary-foreground shadow-sm hover:border-slate-300 hover:bg-slate-100 hover:shadow-md dark:border-white/10 dark:bg-black/30 dark:text-slate-100 dark:hover:border-white/20 dark:hover:bg-white/8",
-        outline:
-          "border border-slate-200 bg-white/92 text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 hover:shadow-md dark:border-white/10 dark:bg-black/30 dark:text-slate-100 dark:hover:border-white/20 dark:hover:bg-white/8 dark:hover:text-white",
-        ghost: "text-slate-600 hover:bg-slate-100 hover:text-slate-900 hover:shadow-sm dark:text-slate-300 dark:hover:bg-white/8 dark:hover:text-white",
+        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+        secondary: "border border-border bg-secondary text-secondary-foreground hover:bg-accent",
+        outline: "border border-input bg-card text-foreground shadow-sm hover:bg-accent",
+        ghost: "text-muted-foreground hover:bg-accent hover:text-foreground",
         destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 hover:shadow-md dark:bg-rose-600 dark:hover:bg-rose-500",
       },
       size: {

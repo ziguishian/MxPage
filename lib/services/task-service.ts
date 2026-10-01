@@ -1,6 +1,7 @@
 import { Prisma, type TaskStatus, type TaskType } from "@prisma/client";
 
 import { prisma } from "@/lib/db/prisma";
+import { assertNoDetailRun } from "@/lib/detail-runs/lock";
 
 export type MxTaskType = TaskType;
 
@@ -21,6 +22,7 @@ export async function createTask(input: {
   status?: TaskStatus;
 }) {
   const status = input.status ?? "RUNNING";
+  if (input.taskType !== "EXPORT") await assertNoDetailRun(input.projectId);
   return prisma.generationTask.create({
     data: {
       projectId: input.projectId,

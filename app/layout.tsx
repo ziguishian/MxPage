@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { Toaster } from "sonner";
+import { ThemeToaster } from "@/components/layout/theme-toggle";
 
 import "./globals.css";
+import "@/components/editor/taobao-product-preview.css";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { ProviderCredentialFetchBridge } from "@/components/layout/provider-credential-fetch-bridge";
@@ -34,7 +35,7 @@ export default function RootLayout({
         <ProviderCredentialFetchBridge />
         <AppShell>{children}</AppShell>
         <BackToTopButton />
-        <Toaster richColors position="top-right" />
+        <ThemeToaster />
       </body>
     </html>
   );

@@ -58,7 +58,7 @@ export function ApiUsageIndicator({ className }: { className?: string }) {
           "inline-flex h-7 items-center rounded-full px-2.5 text-xs font-medium",
           alerting
             ? "bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300"
-            : "bg-slate-100 text-slate-700 dark:bg-white/8 dark:text-slate-200",
+            : "bg-secondary text-secondary-foreground",
         )}
       >
         <Icon className="mr-1.5 h-3.5 w-3.5" />

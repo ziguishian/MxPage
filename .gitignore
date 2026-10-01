@@ -15,6 +15,7 @@
 
 # next.js
 /.next/
+/.next-desktop/
 /out/
 
 # production
@@ -52,3 +53,8 @@ next-env.d.ts
 # local data
 /storage/
 /prisma/dev.db
+
+# Local acceptance evidence and throwaway helpers (curated examples live in docs/examples)
+/ui-review/
+/.bg-*.txt
+/scripts/*acceptance.mjs

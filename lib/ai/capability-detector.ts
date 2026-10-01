@@ -66,7 +66,7 @@ export function detectModelCapabilities(model: string | DetectedModelInput): Cap
     map.structured_output = true;
   }
 
-  if (/(vision|vl|4o|omni|gemini|multimodal|qwen-vl|qvq|pixtral|llava|visual|claude-3|claude-sonnet|claude-opus|gpt-4\.1|gpt-5)/.test(id) || isVisionTyped) {
+  if (/(vision|vl|4o|omni|gemini|multimodal|qwen-vl|qvq|pixtral|llava|visual|claude-3|claude-sonnet|claude-opus|gpt-4\.1|gpt-[56])/.test(id) || isVisionTyped) {
     map.vision = true;
     map.text = true;
     map.structured_output = true;

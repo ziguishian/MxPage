@@ -17,7 +17,7 @@ const variantStyles: Record<
 > = {
   info: {
     wrapper: "border-sky-200 bg-sky-50/80 dark:border-sky-500/20 dark:bg-sky-500/10",
-    icon: "text-sky-600",
+    icon: "text-sky-600 dark:text-sky-300",
     dot: "bg-sky-500",
     title: "text-sky-900 dark:text-sky-100",
     description: "text-sky-800/80 dark:text-sky-200/80",
@@ -25,7 +25,7 @@ const variantStyles: Record<
   },
   success: {
     wrapper: "border-emerald-200 bg-emerald-50/80 dark:border-emerald-500/20 dark:bg-emerald-500/10",
-    icon: "text-emerald-600",
+    icon: "text-emerald-600 dark:text-emerald-300",
     dot: "bg-emerald-500",
     title: "text-emerald-900 dark:text-emerald-100",
     description: "text-emerald-800/80 dark:text-emerald-200/80",
@@ -33,7 +33,7 @@ const variantStyles: Record<
   },
   warning: {
     wrapper: "border-amber-200 bg-amber-50/90 dark:border-amber-500/20 dark:bg-amber-500/10",
-    icon: "text-amber-600",
+    icon: "text-amber-600 dark:text-amber-300",
     dot: "bg-amber-500",
     title: "text-amber-900 dark:text-amber-100",
     description: "text-amber-800/80 dark:text-amber-200/80",
@@ -41,7 +41,7 @@ const variantStyles: Record<
   },
   error: {
     wrapper: "border-rose-200 bg-rose-50/90 dark:border-rose-500/20 dark:bg-rose-500/10",
-    icon: "text-rose-600",
+    icon: "text-rose-600 dark:text-rose-300",
     dot: "bg-rose-500",
     title: "text-rose-900 dark:text-rose-100",
     description: "text-rose-800/80 dark:text-rose-200/80",

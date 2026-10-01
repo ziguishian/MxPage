@@ -80,6 +80,26 @@ model Project {
   analysis      ProductAnalysis?
   sections      PageSection[]
   tasks         GenerationTask[]
+  detailRuns    DetailRun[]
+}
+
+model DetailRun {
+  id             String   @id @default(cuid())
+  projectId      String
+  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  idempotencyKey String
+  status         String   @default("PENDING")
+  stage          String   @default("准备中")
+  input          Json
+  checkpoint     Json
+  leaseToken     String?
+  leaseUntil     DateTime?
+  error          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([projectId, idempotencyKey])
+  @@index([projectId, createdAt])
 }
 
 model ProviderConfig {

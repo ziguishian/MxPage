@@ -1,3 +1,4 @@
+import { Select } from "@/components/ui/select";
 import { Activity, AlertTriangle, Clock3, Coins, Filter, ImageIcon, RefreshCcw, Sparkles } from "lucide-react";
 import Link from "next/link";
 
@@ -117,28 +118,28 @@ export default async function ApiUsageMonitorPage({
           <form className="grid gap-4 md:grid-cols-2 xl:grid-cols-5" method="GET">
             <label className="space-y-2 text-sm">
               <span className="text-muted-foreground">时间范围</span>
-              <select name="hours" defaultValue={String(hours)} className="flex h-10 w-full rounded-xl border border-input bg-white px-3 text-sm dark:bg-white/6 dark:text-slate-100">
+              <Select name="hours" defaultValue={String(hours)}>
                 <option value="1">最近 1 小时</option>
                 <option value="6">最近 6 小时</option>
                 <option value="24">最近 24 小时</option>
                 <option value="72">最近 3 天</option>
                 <option value="168">最近 7 天</option>
-              </select>
+              </Select>
             </label>
             <label className="space-y-2 text-sm">
               <span className="text-muted-foreground">项目</span>
-              <select name="projectId" defaultValue={projectId} className="flex h-10 w-full rounded-xl border border-input bg-white px-3 text-sm dark:bg-white/6 dark:text-slate-100">
+              <Select name="projectId" defaultValue={projectId}>
                 <option value="all">全部项目</option>
                 {filterProjectOptions.map((item) => (
                   <option key={item.projectId} value={item.projectId}>
                     {projectLabel(item.projectId, projectNames)}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
             <label className="space-y-2 text-sm">
               <span className="text-muted-foreground">调用类型</span>
-              <select name="category" defaultValue={category} className="flex h-10 w-full rounded-xl border border-input bg-white px-3 text-sm dark:bg-white/6 dark:text-slate-100">
+              <Select name="category" defaultValue={category}>
                 <option value="all">全部类型</option>
                 <option value="models">模型列表</option>
                 <option value="chat">文本生成</option>
@@ -146,26 +147,26 @@ export default async function ApiUsageMonitorPage({
                 <option value="image_generation">图像生成</option>
                 <option value="image_edit">图像编辑</option>
                 <option value="google_generate_content">Google 图像协议</option>
-              </select>
+              </Select>
             </label>
             <label className="space-y-2 text-sm">
               <span className="text-muted-foreground">状态</span>
-              <select name="success" defaultValue={success} className="flex h-10 w-full rounded-xl border border-input bg-white px-3 text-sm dark:bg-white/6 dark:text-slate-100">
+              <Select name="success" defaultValue={success}>
                 <option value="all">全部状态</option>
                 <option value="success">仅成功</option>
                 <option value="failed">仅失败</option>
-              </select>
+              </Select>
             </label>
             <label className="space-y-2 text-sm">
               <span className="text-muted-foreground">额度 / 限流</span>
-              <select name="quotaState" defaultValue={quotaState} className="flex h-10 w-full rounded-xl border border-input bg-white px-3 text-sm dark:bg-white/6 dark:text-slate-100">
+              <Select name="quotaState" defaultValue={quotaState}>
                 <option value="all">全部</option>
                 <option value="spending_limited">额度已满</option>
                 <option value="rate_limited">限流</option>
                 <option value="auth_error">鉴权异常</option>
                 <option value="other_error">其他错误</option>
                 <option value="ok">正常</option>
-              </select>
+              </Select>
             </label>
             <div className="md:col-span-2 xl:col-span-5 flex justify-end">
               <input type="hidden" name="page" value="1" />

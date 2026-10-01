@@ -1,5 +1,9 @@
 "use client";
 
+import { HERO_MIN, HERO_MAX, DETAIL_MIN, DETAIL_MAX } from "@/lib/utils/image-counts";
+import { Select } from "@/components/ui/select";
+
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -94,10 +98,10 @@ const shellItems = [
 function getPreviewConfig(project: any): PreviewConfig {
   const config = project?.modelSnapshot?.previewConfig ?? {};
   return {
-    heroImageCount: Math.min(5, Math.max(3, Number(config.heroImageCount ?? defaultPreviewConfig.heroImageCount))),
+    heroImageCount: Math.min(HERO_MAX, Math.max(HERO_MIN, Number(config.heroImageCount ?? defaultPreviewConfig.heroImageCount))),
     detailSectionCount: Math.min(
-      10,
-      Math.max(4, Number(config.detailSectionCount ?? defaultPreviewConfig.detailSectionCount)),
+      DETAIL_MAX,
+      Math.max(DETAIL_MIN, Number(config.detailSectionCount ?? defaultPreviewConfig.detailSectionCount)),
     ),
     imageAspectRatio: config.imageAspectRatio === "3:4" ? "3:4" : defaultPreviewConfig.imageAspectRatio,
     contentLanguage: config.contentLanguage ?? defaultPreviewConfig.contentLanguage,
@@ -828,12 +832,11 @@ export function PlannerWorkspace({ project }: PlannerWorkspaceProps) {
                     <div className="grid gap-4 lg:grid-cols-2">
                       <div className="space-y-2">
                         <Label>模块类型</Label>
-                        <select
-                          className="flex h-10 w-full rounded-xl border border-input bg-white px-3 text-sm dark:bg-black/30 dark:text-slate-100"
+                        <Select
                           value={String(section.type).toLowerCase()}
-                          onChange={(event) =>
+                          onValueChange={(value) =>
                             setSections((current: any[]) =>
-                              current.map((item) => (item.id === section.id ? { ...item, type: event.target.value.toUpperCase() } : item)),
+                              current.map((item) => (item.id === section.id ? { ...item, type: value.toUpperCase() } : item)),
                             )
                           }
                         >
@@ -842,7 +845,7 @@ export function PlannerWorkspace({ project }: PlannerWorkspaceProps) {
                               {sectionTypeLabels[type]}
                             </option>
                           ))}
-                        </select>
+                        </Select>
                       </div>
                       <div className="space-y-2">
                         <Label>头图标题</Label>
@@ -987,11 +990,9 @@ export function PlannerWorkspace({ project }: PlannerWorkspaceProps) {
                     <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
                       <div className="space-y-2">
                         <Label>模块类型</Label>
-                        <select
-                          className="flex h-10 w-full rounded-xl border border-input bg-white px-3 text-sm dark:bg-black/30 dark:text-slate-100"
+                        <Select
                           value={String(section.type).toLowerCase()}
-                          onChange={(event) => {
-                            const value = event.target.value;
+                          onValueChange={(value) => {
                             setSections((current: any[]) =>
                               current.map((item) => (item.id === section.id ? { ...item, type: value.toUpperCase() } : item)),
                             );
@@ -1002,7 +1003,7 @@ export function PlannerWorkspace({ project }: PlannerWorkspaceProps) {
                               {sectionTypeLabels[type]}
                             </option>
                           ))}
-                        </select>
+                        </Select>
                       </div>
                       <div className="space-y-2">
                         <Label>模块标题</Label>

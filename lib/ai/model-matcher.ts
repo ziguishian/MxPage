@@ -45,11 +45,16 @@ function normalizeModelId(modelId: string) {
 
 function findPreferredModel(models: ModelDetectionResult[], preferredIds: string[]) {
   const normalizedPreferences = preferredIds.map(normalizeModelId);
-  return models.find((model) => normalizedPreferences.includes(normalizeModelId(model.modelId))) ?? null;
+  for (const id of normalizedPreferences) {
+    const match = models.find(model => normalizeModelId(model.modelId) === id);
+    if (match) return match;
+  }
+  return null;
 }
 
 function findGptImage2Model(models: ModelDetectionResult[]) {
   return (
+    findPreferredModel(models, ["gpt-image-2.5-sunburst", "gpt-image-2.5-flare"]) ??
     findPreferredModel(models, ["gpt-image-2", "gptimage2"]) ??
     sortByScore(
       models.filter((model) => /^gpt[-_\s]?image[-_\s]?2(?:[-_\s]|$)/i.test(model.modelId)),
@@ -60,6 +65,7 @@ function findGptImage2Model(models: ModelDetectionResult[]) {
 }
 
 const COST_EFFECTIVE_TEXT_MODELS = [
+  "gpt-6-luna",
   "gpt-5-mini",
   "gpt-5-nano",
   "gpt-4.1-mini",
@@ -115,6 +121,7 @@ function scoreImageCandidate(model: ModelDetectionResult) {
 }
 
 export function recommendDefaultModels(models: ModelDetectionResult[]) {
+  models = models.filter(model => model.isAvailable !== false);
   const visionModels = models.filter(isVisionCandidate);
   const textModels = models.filter(isTextGenerationCandidate);
   const stableImageGenerationModels = models.filter(

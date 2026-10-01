@@ -2,15 +2,12 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowRight, Layers3, Trash2 } from "lucide-react";
+import { Layers3, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import { StatusBadge } from "@/components/shared/status-badge";
-import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
-import { cn, formatDate } from "@/lib/utils";
-import { platformLabels, styleLabels } from "@/types/domain";
+import { formatDate } from "@/lib/utils";
+import { platformLabels } from "@/types/domain";
 
 interface RecentProjectListProps {
   initialProjects: Array<{
@@ -60,75 +57,17 @@ export function RecentProjectList({ initialProjects }: RecentProjectListProps) {
   return (
     <div className="columns-1 gap-4 md:columns-2 xl:columns-4">
       {projects.map((project) => (
-        <article
-          key={project.id}
-          className="group mb-4 break-inside-avoid overflow-hidden rounded-[28px] border border-border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-white/[0.04]"
-        >
-          <div className="relative overflow-hidden rounded-t-[28px] bg-muted">
-            {project.coverImageUrl ? (
-              <img
-                src={project.coverImageUrl}
-                alt={project.name}
-                className="block h-auto w-full rounded-t-[28px] transition duration-300 group-hover:scale-[1.02]"
-                suppressHydrationWarning
-              />
-            ) : (
-              <div className="flex min-h-[280px] w-full items-center justify-center rounded-t-[28px] bg-gradient-to-br from-white via-slate-100 to-zinc-100 text-slate-500 dark:from-white/[0.08] dark:via-white/[0.04] dark:to-black dark:text-slate-400">
-                <div className="flex flex-col items-center gap-3 text-center">
-                  <Layers3 className="h-8 w-8" />
-                  <p className="text-sm font-medium">暂无封面图</p>
-                </div>
-              </div>
-            )}
-
-            <div className="absolute left-4 top-4 flex items-center gap-2">
-              <StatusBadge value={project.status} />
-              <Badge variant="outline" className="bg-white/90 backdrop-blur dark:bg-black/35">
-                {project.sectionCount} 个模块
-              </Badge>
+        <article key={project.id} className="group relative mb-4 break-inside-avoid overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-shadow hover:shadow-lg">
+          <Link href={project.platform === "xiaohongshu" ? `/xiaohongshu?project=${project.id}` : `/projects/${project.id}/${project.sectionCount ? "editor" : "configure"}`} aria-label={`打开作品：${project.name}`} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-foreground">
+            {project.coverImageUrl ? <img src={project.coverImageUrl} alt={project.name} className="block h-auto min-h-52 w-full object-cover transition-transform duration-300 motion-reduce:transition-none group-hover:scale-[1.02]"/> : <div className="flex aspect-square items-center justify-center bg-muted text-muted-foreground"><Layers3 className="h-8 w-8"/></div>}
+            <div className="project-card-overlay pointer-events-none absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/90 via-black/20 to-transparent p-5 text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
+              <h3 className="line-clamp-2 text-lg font-semibold">{project.name}</h3>
+              <p className="mt-2 text-sm text-white/90">{platformLabels[project.platform as keyof typeof platformLabels] ?? project.platform} · {project.sectionCount} 个模块</p>
+              <p className="mt-2 text-xs text-white/80">{formatDate(project.updatedAt)}</p>
+              <span className="mt-3 text-sm">查看详情 ↗</span>
             </div>
-
-            <button
-              type="button"
-              onClick={() => setPendingDelete({ id: project.id, name: project.name })}
-              className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/90 text-slate-700 shadow-sm transition hover:scale-105 hover:bg-white active:scale-95 dark:border-white/10 dark:bg-black/45 dark:text-slate-200 dark:hover:bg-black/60"
-              aria-label={`删除项目 ${project.name}`}
-            >
-              <Trash2 className="h-4 w-4 text-rose-500" />
-            </button>
-          </div>
-
-          <div className="space-y-4 p-5">
-            <div className="space-y-2">
-              <h3 className="line-clamp-2 text-lg font-semibold leading-7 text-slate-900 dark:text-white">{project.name}</h3>
-              <p className="text-sm leading-6 text-muted-foreground">
-                平台：{platformLabels[project.platform as keyof typeof platformLabels] ?? project.platform}
-                <br />
-                风格：{styleLabels[project.style as keyof typeof styleLabels] ?? project.style}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-slate-50 px-4 py-3 text-xs text-slate-500 dark:bg-white/[0.06] dark:text-slate-400">
-              最近更新：{formatDate(project.updatedAt)}
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <Link href={`/projects/${project.id}/analysis`} className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
-                分析
-              </Link>
-              <Link href={`/projects/${project.id}/planner`} className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
-                规划
-              </Link>
-            </div>
-
-            <Link
-              href={`/projects/${project.id}/editor`}
-              className={cn(buttonVariants({ variant: "default", size: "sm" }), "w-full justify-center")}
-            >
-              进入预览与编辑
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </div>
+          </Link>
+          <button type="button" onClick={() => setPendingDelete({id:project.id,name:project.name})} aria-label={`删除项目 ${project.name}`} className="project-card-overlay absolute right-3 top-3 rounded-full border border-border bg-card p-2.5 text-foreground opacity-0 transition-opacity hover:bg-muted focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100"><Trash2 className="h-4 w-4"/></button>
         </article>
       ))}
 

@@ -1,5 +1,9 @@
 "use client";
 
+import { HERO_MIN, HERO_MAX, DETAIL_MIN, DETAIL_MAX, heroCountOptions, detailCountOptions } from "@/lib/utils/image-counts";
+import { Select } from "@/components/ui/select";
+
+
 import { useMemo, useState } from "react";
 import { Loader2, Settings2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -33,8 +37,8 @@ function normalizePreviewConfig(snapshot: unknown): PreviewConfig {
   const previewConfig = (data.previewConfig as Record<string, unknown> | null) ?? {};
 
   return {
-    heroImageCount: Math.min(5, Math.max(3, Number(previewConfig.heroImageCount ?? 4))),
-    detailSectionCount: Math.min(10, Math.max(4, Number(previewConfig.detailSectionCount ?? 6))),
+    heroImageCount: Math.min(HERO_MAX, Math.max(HERO_MIN, Number(previewConfig.heroImageCount ?? 4))),
+    detailSectionCount: Math.min(DETAIL_MAX, Math.max(DETAIL_MIN, Number(previewConfig.detailSectionCount ?? 6))),
     imageAspectRatio: previewConfig.imageAspectRatio === "3:4" ? "3:4" : "9:16",
     contentLanguage: normalizeContentLanguage(previewConfig.contentLanguage),
   };
@@ -148,13 +152,12 @@ export function ProjectOutputConfigCard({
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <div className="space-y-2">
             <Label>内容语言</Label>
-            <select
-              className="flex h-10 w-full rounded-xl border border-input bg-white px-3 text-sm dark:bg-black/30 dark:text-slate-100"
+            <Select
               value={formState.contentLanguage}
-              onChange={(event) =>
+              onValueChange={(value) =>
                 setFormState((current) => ({
                   ...current,
-                  contentLanguage: normalizeContentLanguage(event.target.value),
+                  contentLanguage: normalizeContentLanguage(value),
                 }))
               }
             >
@@ -163,61 +166,58 @@ export function ProjectOutputConfigCard({
                   {contentLanguageLabels[option]}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label>头图数量</Label>
-            <select
-              className="flex h-10 w-full rounded-xl border border-input bg-white px-3 text-sm dark:bg-black/30 dark:text-slate-100"
+            <Select
               value={String(formState.heroImageCount)}
-              onChange={(event) =>
+              onValueChange={(value) =>
                 setFormState((current) => ({
                   ...current,
-                  heroImageCount: Math.min(5, Math.max(3, Number(event.target.value))),
+                  heroImageCount: Math.min(HERO_MAX, Math.max(HERO_MIN, Number(value))),
                 }))
               }
             >
-              {[3, 4, 5].map((count) => (
+              {heroCountOptions.map((count) => (
                 <option key={count} value={count}>
                   {count} 张
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label>详情页数量</Label>
-            <select
-              className="flex h-10 w-full rounded-xl border border-input bg-white px-3 text-sm dark:bg-black/30 dark:text-slate-100"
+            <Select
               value={String(formState.detailSectionCount)}
-              onChange={(event) =>
+              onValueChange={(value) =>
                 setFormState((current) => ({
                   ...current,
-                  detailSectionCount: Math.min(10, Math.max(4, Number(event.target.value))),
+                  detailSectionCount: Math.min(DETAIL_MAX, Math.max(DETAIL_MIN, Number(value))),
                 }))
               }
             >
-              {[4, 5, 6, 7, 8, 9, 10].map((count) => (
+              {detailCountOptions.map((count) => (
                 <option key={count} value={count}>
                   {count} 张
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label>详情图比例</Label>
-            <select
-              className="flex h-10 w-full rounded-xl border border-input bg-white px-3 text-sm dark:bg-black/30 dark:text-slate-100"
+            <Select
               value={formState.imageAspectRatio}
-              onChange={(event) =>
+              onValueChange={(value) =>
                 setFormState((current) => ({
                   ...current,
-                  imageAspectRatio: event.target.value === "3:4" ? "3:4" : "9:16",
+                  imageAspectRatio: value === "3:4" ? "3:4" : "9:16",
                 }))
               }
             >
               <option value="9:16">9:16</option>
               <option value="3:4">3:4</option>
-            </select>
+            </Select>
           </div>
         </div>
 

@@ -35,12 +35,13 @@ export function BackToTopButton() {
     <button
       type="button"
       onClick={handleBackToTop}
+      tabIndex={visible ? 0 : -1}
       aria-label="回到顶部"
       className={[
         "fixed bottom-6 right-6 z-50 inline-flex h-12 w-12 items-center justify-center rounded-full",
-        "border border-slate-200 bg-white/92 text-slate-700 shadow-[0_18px_40px_-22px_rgba(0,0,0,0.32)] backdrop-blur-xl",
-        "transition-all duration-200 hover:-translate-y-0.5 hover:bg-white hover:text-slate-950 hover:shadow-[0_22px_45px_-24px_rgba(0,0,0,0.34)] active:scale-[0.97]",
-        "dark:border-white/10 dark:bg-[#111214]/92 dark:text-slate-200 dark:hover:bg-[#18181b] dark:hover:text-white",
+        "border border-border bg-card text-foreground shadow-lg",
+        "transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent hover:shadow-[0_22px_45px_-24px_rgba(0,0,0,0.34)] active:scale-[0.97]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         visible ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0",
       ].join(" ")}
     >

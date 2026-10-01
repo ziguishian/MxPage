@@ -2,7 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
 :root {
+  color-scheme: light;
   --background: 0 0% 97%;
   --foreground: 0 0% 8%;
   --muted: 0 0% 92%;
@@ -28,21 +30,22 @@
 }
 
 .dark {
-  --background: 0 0% 5%;
+  color-scheme: dark;
+  --background: 0 0% 7%;
   --foreground: 0 0% 96%;
-  --muted: 0 0% 10%;
-  --muted-foreground: 0 0% 65%;
-  --popover: 0 0% 7%;
+  --muted: 0 0% 17%;
+  --muted-foreground: 0 0% 70%;
+  --popover: 0 0% 14%;
   --popover-foreground: 0 0% 96%;
-  --card: 0 0% 8%;
+  --card: 0 0% 11%;
   --card-foreground: 0 0% 96%;
-  --border: 0 0% 16%;
-  --input: 0 0% 16%;
+  --border: 0 0% 24%;
+  --input: 0 0% 34%;
   --primary: 0 0% 96%;
   --primary-foreground: 0 0% 8%;
   --secondary: 0 0% 14%;
   --secondary-foreground: 0 0% 94%;
-  --accent: 0 0% 12%;
+  --accent: 0 0% 20%;
   --accent-foreground: 0 0% 94%;
   --destructive: 0 72% 56%;
   --destructive-foreground: 0 0% 100%;
@@ -75,33 +78,14 @@ body::-webkit-scrollbar {
 
 body {
   @apply bg-background text-foreground antialiased;
-  background-image:
-    linear-gradient(to right, rgba(15, 23, 42, 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(15, 23, 42, 0.045) 1px, transparent 1px),
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.9), transparent 26%),
-    radial-gradient(circle at top right, rgba(15, 23, 42, 0.04), transparent 18%),
-    linear-gradient(180deg, rgba(250, 250, 250, 0.98), rgba(242, 242, 242, 0.96));
-  background-size:
-    44px 44px,
-    44px 44px,
-    auto,
-    auto,
-    auto;
-  background-position:
-    center,
-    center,
-    center,
-    center,
-    center;
 }
 
-.dark body {
+body:has([data-home-workspace]) {
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.06), transparent 24%),
-    radial-gradient(circle at top right, rgba(255, 255, 255, 0.03), transparent 18%),
-    linear-gradient(180deg, rgba(10, 10, 11, 0.99), rgba(6, 6, 7, 0.98));
+    linear-gradient(to right, hsl(var(--foreground) / 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--foreground) / 0.055) 1px, transparent 1px);
+  background-size: 44px 44px;
+  background-position: center top;
 }
 
 a {
@@ -117,20 +101,23 @@ select {
 }
 
 select {
-  appearance: none;
+  appearance: auto;
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--card));
 }
 
-.dark input,
-.dark textarea,
-.dark select {
-  color: rgb(241 245 249);
-  background-color: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.1);
+select:focus-visible, a:focus-visible, summary:focus-visible, button:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 3px;
 }
 
-.dark option {
-  background-color: rgb(15 15 16);
-  color: rgb(241 245 249);
+option {
+  background-color: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+}
+
+input[type="checkbox"], input[type="radio"] {
+  accent-color: hsl(var(--primary));
 }
 
 button,
@@ -148,6 +135,7 @@ input:disabled,
 select:disabled,
 textarea:disabled {
   cursor: not-allowed;
+}
 }
 
 .grid-surface {
@@ -170,4 +158,18 @@ textarea:disabled {
   display: none;
   width: 0;
   height: 0;
+}
+@keyframes upload-stack-arrive {
+  from { opacity: 0; scale: .93; }
+  to { opacity: 1; scale: 1; }
+}
+.upload-stack-card {
+  animation: upload-stack-arrive 320ms ease-out both;
+  transition: transform 350ms ease, inset 350ms ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .upload-stack-card { animation: none; transition: none; }
+}
+@media (hover: none) {
+  .project-card-overlay { opacity: 1; }
 }

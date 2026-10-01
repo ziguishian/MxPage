@@ -22,6 +22,7 @@ export interface ApiUsageEntry {
   model: string | null;
   projectId: string | null;
   sectionId: string | null;
+  runId?: string | null;
   operation: string | null;
   category: ApiUsageCategory;
   success: boolean;
@@ -117,6 +118,10 @@ export function humanizeApiMonitorMessage(input: {
   }
 
   const normalized = raw.toLowerCase();
+
+  if (/\bEACCES\b|\bEPERM\b/i.test(raw)) {
+    return "本地服务的外网访问被运行环境限制，请在允许联网的环境中重新启动服务。";
+  }
 
   if (
     /monthly spending limit|spending limit|insufficient_quota|quota.*exceed|quota exceeded|billing|可用余额不足|余额不足|充值后再使用/i.test(
@@ -321,6 +326,7 @@ export async function logApiUsage(params: {
   model: string | null;
   projectId?: string | null;
   sectionId?: string | null;
+  runId?: string | null;
   operation?: string | null;
   category: ApiUsageCategory;
   statusCode: number;
@@ -357,6 +363,7 @@ export async function logApiUsage(params: {
     model: params.model,
     projectId: params.projectId ?? null,
     sectionId: params.sectionId ?? null,
+    runId: params.runId ?? null,
     operation: params.operation ?? null,
     category: params.category,
     success: params.success,

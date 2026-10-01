@@ -25,6 +25,7 @@ function getPreviewConfig(project: { modelSnapshot: unknown } | null) {
 
 function buildGalleryAssets(project: {
   assets: any[];
+  detailRuns?: { id: string }[];
   sections: Array<{ id: string; title: string; type: string; currentImageAsset: any | null; versions?: any[] }>;
   modelSnapshot: unknown;
 }) {
@@ -37,6 +38,10 @@ function buildGalleryAssets(project: {
       title: section.title || `头图 ${index + 1}`,
       sourceLabel: "头图规划",
     }));
+
+  // New workflows export only actual output, never source photos as missing heroes.
+  const snapshot = project.modelSnapshot as { creationConfigured?: boolean; translationReady?: boolean } | null;
+  if (project.detailRuns?.length || snapshot?.creationConfigured || snapshot?.translationReady) return heroSectionAssets;
 
   const merged = [
     ...heroSectionAssets,
@@ -113,6 +118,7 @@ export async function buildImageArchive(projectId: string) {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
     include: {
+      detailRuns: { select: { id: true }, take: 1 },
       assets: {
         orderBy: [{ isMain: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
       },

@@ -31,7 +31,12 @@ function runCommand(command, args, options = {}) {
 }
 
 async function removePath(targetPath) {
-  await fsp.rm(targetPath, { recursive: true, force: true });
+  const resolved = path.resolve(targetPath);
+  const relative = path.relative(desktopDistDir, resolved);
+  if (!relative || relative.startsWith("..") || path.isAbsolute(relative)) {
+    throw new Error(`Refusing to remove a path outside the desktop build: ${resolved}`);
+  }
+  await fsp.rm(resolved, { recursive: true, force: true });
 }
 
 async function copyFileWithParents(sourcePath, targetPath) {

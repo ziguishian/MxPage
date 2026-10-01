@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import { ProviderSettings } from "@/components/providers/provider-settings";
+import { AgentCompatibility } from "@/components/providers/agent-compatibility";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -125,6 +126,7 @@ export default function ProviderSettingsPageClient() {
         description="页面展示已保存的 Provider 与模型快照。API Key 仅保存在当前浏览器；私有化部署可通过 LOCK_BASE_URL 锁定统一 API 通道。"
       />
 
+      <AgentCompatibility />
       {loading ? (
         <LoadingState />
       ) : error ? (

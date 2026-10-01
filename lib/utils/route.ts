@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 
 import { apiError, apiSuccess } from "@/lib/utils/api";
+import { networkErrorCode } from "./network-error";
 
 export function ok<T>(data: T, init?: ResponseInit) {
   return NextResponse.json(apiSuccess(data), init);
@@ -13,6 +14,15 @@ export function fail(code: string, message: string, details?: unknown, status = 
 
 function mapProviderError(error: Error) {
   const text = error.message.toLowerCase();
+  const causeCode = networkErrorCode(error);
+
+  if (causeCode === "EACCES" || causeCode === "EPERM") {
+    return {
+      code: "PROVIDER_NETWORK_PERMISSION",
+      message: "本地服务的外网访问被运行环境限制。请在允许网络访问的环境中重新启动服务后重试。",
+      status: 503,
+    };
+  }
 
   if (/monthly spending limit|spending limit|insufficient_quota|quota|billing|额度已用尽|月度限额/.test(text)) {
     return {
@@ -38,11 +48,19 @@ function mapProviderError(error: Error) {
     };
   }
 
-  if (/timed out|aborterror|network error|fetch failed|请求超时|网络异常/.test(text)) {
+  if (/timed out|timeout|aborterror|请求超时|\b504\b/.test(text) || causeCode === "ETIMEDOUT" || causeCode === "UND_ERR_CONNECT_TIMEOUT") {
     return {
       code: "PROVIDER_TIMEOUT",
-      message: "当前 Provider 请求超时或网络异常，请稍后重试。",
+      message: "当前 Provider 响应超时，请稍后重试，并检查厂商服务状态。",
       status: 504,
+    };
+  }
+
+  if (/network error|fetch failed|网络异常/.test(text) || causeCode) {
+    return {
+      code: "PROVIDER_NETWORK_ERROR",
+      message: "本地服务无法连接模型厂商，请检查 baseURL、DNS、代理及防火墙设置。",
+      status: 502,
     };
   }
 

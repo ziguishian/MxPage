@@ -1,0 +1,70 @@
+.mx-taobao-device { position: relative; width: 100%; max-width: 375px; aspect-ratio: 375 / 812; margin: auto; box-shadow: 0 16px 50px #00000012; }
+.mx-taobao-screen { position: absolute; inset: 0 auto auto 0; width: 375px; height: 812px; overflow: hidden; transform-origin: top left; background: #f5f5f5; color: #333; color-scheme: light; font: 14px/1.45 Arial, "PingFang SC", "Microsoft YaHei", sans-serif; }
+.mx-taobao-screen button { cursor: pointer; }
+.mx-taobao-screen button:focus-visible { outline: 2px solid #b65b1e; outline-offset: -2px; }
+.mx-taobao-status { position: absolute; z-index: 4; top: 0; left: 0; right: 0; height: 44px; padding: 0 23px 0 32px; display: flex; align-items: center; justify-content: space-between; font-size: 17px; font-weight: 600; color: #111; pointer-events: none; }
+.mx-taobao-status > span:last-child { display: flex; align-items: center; gap: 3px; }
+.mx-taobao-solid { background: #fff; }
+.mx-taobao-navigation { position: absolute; z-index: 4; top: 44px; width: 100%; height: 44px; display: flex; align-items: center; padding: 0 11px; gap: 8px; }
+.mx-taobao-navigation > button { width: 29px; height: 29px; display: grid; place-items: center; flex-shrink: 0; }
+.mx-taobao-overlay > button { background: #5557; border-radius: 50%; color: white; }
+.mx-taobao-tabs { display: flex; flex: 1; height: 100%; justify-content: center; gap: 20px; }
+.mx-taobao-tabs button { position: relative; font-size: 14px; white-space: nowrap; }
+.mx-taobao-tabs button[aria-current] { color: #bf743e; }
+.mx-taobao-tabs button[aria-current]::after { content: ""; position: absolute; bottom: 5px; left: 0; right: 0; height: 2px; background: #bd6e34; }
+.mx-taobao-viewport { position: absolute; inset: 0 0 84px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+.mx-taobao-viewport::-webkit-scrollbar { display: none; }
+.mx-taobao-gallery { position: relative; width: 375px; height: 375px; background: white; touch-action: pan-y; }
+.mx-taobao-gallery > button:not(.mx-taobao-galleryArrow) { display: block; width: 100%; }
+.mx-taobao-galleryArrow { position: absolute; top: 50%; z-index: 1; display: grid; place-items: center; width: 44px; height: 44px; transform: translateY(-50%); border: 1px solid #00000014; border-radius: 50%; background: #ffffffe6; color: #222; box-shadow: 0 2px 10px #0000001f; transition: background-color 150ms, box-shadow 150ms; }
+.mx-taobao-galleryArrow:hover { background: #fff; box-shadow: 0 3px 14px #0000002e; }
+.mx-taobao-galleryArrow:active { background: #ededed; }
+.mx-taobao-galleryPrevious { left: 8px; }
+.mx-taobao-galleryNext { right: 8px; }
+.mx-taobao-gallery img { width: 375px; height: 375px; object-fit: contain; }
+.mx-taobao-emptyHero { display: grid; height: 100%; place-items: center; color: #aaa; }
+.mx-taobao-counter { position: absolute; right: 17px; bottom: 14px; padding: 2px 8px; background: #3338; color: white; border-radius: 20px; font-size: 12px; pointer-events: none; }
+.mx-taobao-productInfo { background: white; padding: 10px 12px 9px; }
+.mx-taobao-price { font-size: 24px; line-height: 32px; color: #f47523; }
+.mx-taobao-price small { font-size: 14px; }
+.mx-taobao-priceMissing { font-size: 16px; color: #a8a8a8; }
+.mx-taobao-titleRow { display: flex; align-items: flex-start; gap: 8px; margin: 5px 0 10px; }
+.mx-taobao-titleRow h3 { flex: 1; margin: 0; font-size: 15px; font-weight: 400; line-height: 21px; overflow-wrap: anywhere; }
+.mx-taobao-titleRow button { display: flex; align-items: center; gap: 4px; padding: 3px 0 3px 5px; color: #aaa; font-size: 11px; }
+.mx-taobao-meta { display: flex; justify-content: space-between; gap: 6px; font-size: 12px; color: #999; }
+.mx-taobao-group { background: #fff; margin-top: 10px; }
+.mx-taobao-row { display: flex; align-items: center; width: 100%; min-height: 42px; text-align: left; gap: 17px; padding: 10px 12px; font-size: 13px; }
+.mx-taobao-row > span { color: #aaa; flex: none; }
+.mx-taobao-row strong { font-weight: 400; flex: 1; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+.mx-taobao-row svg { color: #ccc; flex-shrink: 0; }
+.mx-taobao-sectionHeading { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 14px 12px 8px; text-align: left; }
+.mx-taobao-sectionHeading span:last-child { display: flex; align-items: center; color: #bf753f; font-size: 12px; }
+.mx-taobao-empty { padding: 12px 12px 20px; font-size: 12px; color: #aaa; }
+.mx-taobao-shop { padding: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
+.mx-taobao-shopLogo { width: 47px; height: 47px; border-radius: 3px; background: #e9ece8; color: #6d776c; display: grid; place-items: center; }
+.mx-taobao-shopName { flex: 1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mx-taobao-shop > button { padding: 4px 10px; border-radius: 20px; color: white; background: #ff9400; font-size: 12px; }
+.mx-taobao-shopScores { display: flex; justify-content: space-between; width: 100%; padding-top: 8px; font-size: 12px; color: #aaa; }
+.mx-taobao-detailSection { margin-top: 10px; background: white; }
+.mx-taobao-detailSection h4 { height: 44px; display: grid; place-items: center; font-size: 13px; font-weight: 400; color: #777; background: #f5f5f5; }
+.mx-taobao-detailSection button { display: block; width: 100%; padding: 0; margin: 0; border: 0; line-height: 0; }
+.mx-taobao-detailSection img { display: block; width: 100%; height: auto; }
+.mx-taobao-recommendations { padding: 24px 12px 30px; text-align: center; }
+.mx-taobao-recommendations h4 { font-size: 14px; font-weight: 400; }
+.mx-taobao-recommendations p { margin-top: 12px; color: #aaa; font-size: 12px; }
+.mx-taobao-footer { position: absolute; z-index: 5; bottom: 0; width: 100%; height: 84px; background: white; }
+.mx-taobao-purchaseBar { display: flex; align-items: center; gap: 0; height: 55px; padding: 4px 9px 0; }
+.mx-taobao-purchaseBar > button { width: 46px; height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #999; }
+.mx-taobao-purchaseBar > button:first-child svg { color: #b27346; }
+.mx-taobao-purchaseBar > button span { font-size: 10px; }
+.mx-taobao-buyButtons { display: flex; flex: 1; border-radius: 24px; overflow: hidden; margin-left: 2px; height: 40px; color: white; }
+.mx-taobao-buyButtons button { flex: 1; font-size: 13px; white-space: nowrap; }
+.mx-taobao-buyButtons button:first-child { background: linear-gradient(100deg, #ffce00, #ff9900); }
+.mx-taobao-buyButtons button:last-child { background: linear-gradient(100deg, #ff9700, #ff5000); }
+.mx-taobao-homeIndicator { width: 134px; height: 5px; border-radius: 5px; background: #171717; margin: 18px auto 0; }
+.mx-taobao-sheetOverlay { position: absolute; inset: 0; z-index: 6; background: #0006; }
+.mx-taobao-sheet { position: absolute; z-index: 7; left: 0; right: 0; bottom: 0; padding: 24px 18px 34px; min-height: 220px; border-radius: 14px 14px 0 0; background: white; }
+.mx-taobao-sheet h2 { font-size: 17px; margin: 0 28px 20px 0; font-weight: 500; }
+.mx-taobao-sheet p { font-size: 13px; color: #777; margin: 14px 0; white-space: pre-wrap; }
+.mx-taobao-sheetClose { position: absolute; right: 16px; top: 24px; color: #777; }
+.mx-taobao-sheetConfirm { width: 100%; padding: 10px; margin-top: 16px; background: linear-gradient(100deg, #ff9400, #ff5000); border-radius: 24px; color: white; }

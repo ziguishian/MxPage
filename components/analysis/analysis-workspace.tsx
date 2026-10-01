@@ -1,4 +1,7 @@
-﻿"use client";
+"use client";
+
+import { Select } from "@/components/ui/select";
+
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -250,31 +253,29 @@ export function AnalysisWorkspace({
             </div>
             <div className="space-y-2">
               <Label>平台</Label>
-              <select
-                className="flex h-10 w-full rounded-xl border border-input bg-white px-3 text-sm"
+              <Select
                 value={projectState.platform}
-                onChange={(event) => updateProjectField("platform", event.target.value)}
+                onValueChange={(value) => updateProjectField("platform", value)}
               >
                 {platformOptions.map((option) => (
                   <option key={option} value={option}>
                     {platformLabels[option]}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label>风格</Label>
-              <select
-                className="flex h-10 w-full rounded-xl border border-input bg-white px-3 text-sm"
+              <Select
                 value={projectState.style}
-                onChange={(event) => updateProjectField("style", event.target.value)}
+                onValueChange={(value) => updateProjectField("style", value)}
               >
                 {styleOptions.map((option) => (
                   <option key={option} value={option}>
                     {styleLabels[option]}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label>备注</Label>

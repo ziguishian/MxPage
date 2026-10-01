@@ -1,3 +1,4 @@
+import { HERO_MIN, HERO_MAX, DETAIL_MIN, DETAIL_MAX } from "@/lib/utils/image-counts";
 import { Prisma } from "@prisma/client";
 import { nanoid } from "nanoid";
 import { z } from "zod";
@@ -5,6 +6,7 @@ import { z } from "zod";
 import { buildSectionPlanningPrompt, buildVisualStyleGuidePrompt } from "@/lib/ai/prompts";
 import { sectionPlanOutputSchema, visualStyleGuideSchema } from "@/lib/ai/schemas/section-plan";
 import { prisma } from "@/lib/db/prisma";
+import { assertNoDetailRun } from "@/lib/detail-runs/lock";
 import { readStorageFile } from "@/lib/storage/asset-manager";
 import { getProviderAdapter } from "@/lib/services/provider-service";
 import { completeTask, createTask, failTask, findRecentRunningTask } from "@/lib/services/task-service";
@@ -41,15 +43,15 @@ type NormalizedSection = {
 };
 
 const previewConfigSchema = z.object({
-  heroImageCount: z.number().int().min(3).max(5),
-  detailSectionCount: z.number().int().min(4).max(10),
+  heroImageCount: z.number().int().min(HERO_MIN).max(HERO_MAX),
+  detailSectionCount: z.number().int().min(DETAIL_MIN).max(DETAIL_MAX),
   imageAspectRatio: z.enum(["3:4", "9:16"]).default("9:16"),
   contentLanguage: z.enum(contentLanguageOptions).default("zh-CN"),
 });
 
 const previewDecisionSchema = z.object({
-  heroImageCount: z.number().int().min(3).max(5),
-  detailSectionCount: z.number().int().min(4).max(10),
+  heroImageCount: z.number().int().min(HERO_MIN).max(HERO_MAX),
+  detailSectionCount: z.number().int().min(DETAIL_MIN).max(DETAIL_MAX),
   reason: z.string().default(""),
 });
 
@@ -457,6 +459,7 @@ async function normalizeProjectSections(projectId: string) {
 }
 
 async function assertSectionMutationAllowed(projectId: string, options: { addingType?: string; deletingSectionId?: string; updatingSectionId?: string; nextType?: string }) {
+  await assertNoDetailRun(projectId);
   const project = await prisma.project.findUnique({
     where: { id: projectId },
     include: {
@@ -479,13 +482,13 @@ async function assertSectionMutationAllowed(projectId: string, options: { adding
 
   if (options.addingType) {
     if (normalizeSectionType(options.addingType) === "HERO") {
-      if (heroCount >= 5) {
-        throw new Error("头图最多保留 5 张，请先删除或改成详情页后再新增。");
+      if (heroCount >= HERO_MAX) {
+        throw new Error("头图最多保留 10 张，请先删除或改成详情页后再新增。");
       }
       heroCount += 1;
     } else {
-      if (detailCount >= 10) {
-        throw new Error("详情页最多保留 10 张，请先删除或改成头图后再新增。");
+      if (detailCount >= DETAIL_MAX) {
+        throw new Error("详情页最多保留 20 张，请先删除或改成头图后再新增。");
       }
       detailCount += 1;
     }
@@ -523,8 +526,8 @@ async function assertSectionMutationAllowed(projectId: string, options: { adding
         if (heroCount <= 3) {
           throw new Error("头图至少保留 3 张，不能把当前头图改成详情页。");
         }
-        if (detailCount >= 10) {
-          throw new Error("详情页最多保留 10 张，请先删除多余详情页后再转换。");
+        if (detailCount >= DETAIL_MAX) {
+          throw new Error("详情页最多保留 20 张，请先删除多余详情页后再转换。");
         }
       }
 
@@ -532,8 +535,8 @@ async function assertSectionMutationAllowed(projectId: string, options: { adding
         if (detailCount <= 4) {
           throw new Error("详情页至少保留 4 张，不能把当前详情页改成头图。");
         }
-        if (heroCount >= 5) {
-          throw new Error("头图最多保留 5 张，请先删除多余头图后再转换。");
+        if (heroCount >= HERO_MAX) {
+          throw new Error("头图最多保留 10 张，请先删除多余头图后再转换。");
         }
       }
     }
@@ -1037,6 +1040,7 @@ export async function updateSection(sectionId: string, input: Record<string, unk
   }
 
   const payload = { ...input } as Record<string, unknown>;
+  await assertNoDetailRun(current.projectId);
   if ("visualPrompt" in payload && typeof payload.visualPrompt === "string") {
     payload.visualPrompt = ensureBilingualPrompt(payload.visualPrompt, String(payload.title ?? "当前模块"));
   }
@@ -1073,6 +1077,7 @@ export async function deleteSection(sectionId: string) {
 }
 
 export async function reorderSections(projectId: string, orderedSectionIds: string[]) {
+  await assertNoDetailRun(projectId);
   await prisma.$transaction(
     orderedSectionIds.map((sectionId, index) =>
       prisma.pageSection.update({

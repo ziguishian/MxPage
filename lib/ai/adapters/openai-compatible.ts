@@ -88,13 +88,20 @@ function resolveAspectRatio(input: { aspectRatio?: "1:1" | "3:4" | "9:16"; size?
   return sizeToAspectRatio(input.size);
 }
 
-function resolveOpenAiSize(input: { aspectRatio?: "1:1" | "3:4" | "9:16"; size?: string }) {
+function resolveOpenAiSize(input: { model?: string; aspectRatio?: "1:1" | "3:4" | "9:16"; size?: string }) {
   if (input.size) {
     return input.size;
   }
 
   if (input.aspectRatio === "1:1") {
     return "1024x1024";
+  }
+
+  // GPT Image 2/2.5 support dimensions divisible by 16; keep the requested ratio.
+  // Earlier models retain their supported portrait preset.
+  if (/(?:^|\/)gpt-image-2(?:[.-]|$)/i.test(input.model ?? "")) {
+    if (input.aspectRatio === "3:4") return "1152x1536";
+    if (input.aspectRatio === "9:16") return "864x1536";
   }
 
   if (input.aspectRatio === "3:4" || input.aspectRatio === "9:16") {
@@ -201,6 +208,7 @@ function readMonitorContext(input?: AiMonitorContext) {
   return {
     projectId: input?.projectId ?? null,
     sectionId: input?.sectionId ?? null,
+    runId: input?.runId ?? null,
     operation: input?.operation ?? null,
   };
 }
@@ -1066,6 +1074,21 @@ export class OpenAICompatibleAdapter implements ProviderAdapter {
     }
 
     throw new Error(`GPT Image multipart request failed: ${errors.join(" | ")}`);
+  }
+
+  // Agent runs own the retry budget: exactly one image request, never a protocol/model retry.
+  async generateAgentImage(input: ImageGenerationRequest): Promise<ImageGenerationResult> {
+    const form = new FormData();
+    form.append("quality", input.quality ?? "auto");
+    form.append("model", input.model);
+    form.append("prompt", input.prompt);
+    form.append("size", resolveOpenAiSize(input));
+    const images = input.referenceImages ?? [];
+    images.forEach((image, index) => form.append(images.length > 1 ? "image[]" : "image", dataUrlToBlob(image), `reference-${index}.png`));
+    const endpoint = `${this.baseUrl.replace(/\/$/, "")}/images/${images.length ? "edits" : "generations"}`;
+    const response = await this.fetchRaw(endpoint, images.length ? { method: "POST", body: form } : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: input.model, prompt: input.prompt, quality: input.quality ?? "auto", size: resolveOpenAiSize(input), n: 1 }) }, undefined, input.timeoutMs ?? 180000, input.monitor);
+    if (!response.ok) throw new Error(`Image request failed (${response.status}). Check API monitor; explicitly retry if needed.`);
+    return extractImageResult(JSON.parse(response.body));
   }
 
   async generateImage(input: ImageGenerationRequest): Promise<ImageGenerationResult> {

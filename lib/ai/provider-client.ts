@@ -3,6 +3,7 @@ import { z } from "zod";
 export interface AiMonitorContext {
   projectId?: string;
   sectionId?: string;
+  runId?: string;
   operation?: string;
 }
 
@@ -38,6 +39,7 @@ export interface TextRequest {
 }
 
 export interface ImageGenerationRequest {
+  quality?: "auto" | "low" | "medium" | "high";
   model: string;
   prompt: string;
   size?: string;

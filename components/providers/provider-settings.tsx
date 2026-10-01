@@ -1,8 +1,11 @@
-﻿"use client";
+"use client";
+
+import { Select } from "@/components/ui/select";
+
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ChevronsUpDown, CopyPlus, History, Loader2, LockKeyhole, PlugZap } from "lucide-react";
+import { CopyPlus, History, Loader2, LockKeyhole, PlugZap } from "lucide-react";
 
 import { CLIENT_PROVIDER_STORAGE_KEY } from "@/components/layout/provider-credential-fetch-bridge";
 import { Badge } from "@/components/ui/badge";
@@ -72,6 +75,7 @@ const modelTypeFields: Array<{ key: ModelTypeKey; label: string }> = [
 ];
 
 const preferredGptTextModelIds = [
+  "gpt-6-luna",
   "gpt-5-mini",
   "gpt-5-nano",
   "gpt-4.1-mini",
@@ -135,6 +139,7 @@ function isPreferredGptTextModel(model: GenericModelRecord) {
 }
 
 function isPreferredGptImage2(model: GenericModelRecord) {
+  if (["gpt-image-2.5-sunburst", "gpt-image-2.5-flare"].includes(String(model.modelId))) return true;
   const modelId = String(model.modelId ?? model.label ?? "");
   const normalized = normalizeModelId(modelId);
   return normalized === "gptimage2" || /^gpt[-_\s]?image[-_\s]?2(?:[-_\s]|$)/i.test(modelId);
@@ -150,6 +155,9 @@ function canUseForModelType(model: GenericModelRecord, typeKey: ModelTypeKey) {
 function scoreModelForType(model: GenericModelRecord, typeKey: ModelTypeKey) {
   let score = 0;
   const text = getModelText(model);
+  if ((typeKey === "text" || typeKey === "vision") && model.modelId === "gpt-6-luna") score += 1000;
+  if ((typeKey === "image_gen" || typeKey === "image_edit") && model.modelId === "gpt-image-2.5-sunburst") score += 1000;
+  if ((typeKey === "image_gen" || typeKey === "image_edit") && model.modelId === "gpt-image-2.5-flare") score += 900;
   if ((typeKey === "text" || typeKey === "vision") && isPreferredGptTextModel(model)) score += 100;
   if ((typeKey === "image_gen" || typeKey === "image_edit") && isPreferredGptImage2(model)) score += 100;
   if (/gpt/i.test(text)) score += 20;
@@ -398,9 +406,15 @@ export function ProviderSettings({ initialProviders, runtimeConfig }: ProviderSe
       const values = persistCurrentCredentials();
       await testProviderConnection(values);
       const { discoveredModels, recommendedDefaults } = await discoverProviderModels(values);
+      // Refresh the catalogue without replacing the user's explicit choices.
+      const sameService = values.baseUrl.replace(/\/+$/, "") === selectedProvider?.baseUrl.replace(/\/+$/, "");
+      const nextDefaults = { ...recommendedDefaults };
+      if (sameService) for (const key of Object.keys(defaults) as Array<keyof DefaultAssignments>) {
+        if (defaults[key] && discoveredModels.some((model: GenericModelRecord) => model.modelId === defaults[key])) nextDefaults[key] = defaults[key];
+      }
       setModels(discoveredModels);
-      setDefaults(recommendedDefaults);
-      await persistProviderConfig(values, true, discoveredModels, recommendedDefaults);
+      setDefaults(nextDefaults);
+      await persistProviderConfig(values, true, discoveredModels, nextDefaults);
       toast.success(`一键配置完成：已连接服务、识别 ${discoveredModels.length} 个模型并保存配置`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "一键配置失败");
@@ -453,11 +467,10 @@ export function ProviderSettings({ initialProviders, runtimeConfig }: ProviderSe
               <div className="flex-1 space-y-2">
                 <Label htmlFor="provider-history">历史服务</Label>
                 <div className="relative">
-                  <select
+                  <Select
                     id="provider-history"
-                    className="flex h-10 w-full appearance-none rounded-xl border border-input bg-background px-3 pr-10 text-sm text-foreground dark:bg-black/30"
                     value={selectedProviderId}
-                    onChange={(event) => setSelectedProviderId(event.target.value)}
+                    onValueChange={(value) => setSelectedProviderId(value)}
                   >
                     {providers.length === 0 ? <option value="">暂无已保存服务</option> : null}
                     {providers.map((provider) => (
@@ -465,8 +478,7 @@ export function ProviderSettings({ initialProviders, runtimeConfig }: ProviderSe
                         {provider.name} / {provider.baseUrl}
                       </option>
                     ))}
-                  </select>
-                  <ChevronsUpDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  </Select>
                 </div>
               </div>
               <div className="flex items-end gap-2">
@@ -548,12 +560,12 @@ export function ProviderSettings({ initialProviders, runtimeConfig }: ProviderSe
                   return (
                     <div key={field.key} className="space-y-2">
                       <Label>{field.label}</Label>
-                      <select className="flex h-10 w-full rounded-xl border border-input bg-background px-3 text-sm text-foreground dark:bg-black/30" value={selectedValue} disabled={options.length === 0} onChange={(event) => setDefaults((current) => setTypeDefaultValue(current, field.key, event.target.value))}>
+                      <Select aria-label={field.label} value={selectedValue} disabled={options.length === 0} onValueChange={(value) => setDefaults((current) => setTypeDefaultValue(current, field.key, value))}>
                         <option value="">{options.length === 0 ? "暂无此类型模型" : "未选择"}</option>
                         {options.map((model) => (
                           <option key={`${field.key}-${model.modelId}`} value={model.modelId}>{model.label}</option>
                         ))}
-                      </select>
+                      </Select>
                     </div>
                   );
                 })}

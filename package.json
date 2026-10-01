@@ -6,6 +6,7 @@
   "author": "灵矩绘境 · MxPage",
   "main": "desktop/main.cjs",
   "scripts": {
+    "test:detail": "tsx --test tests/detail-runs.test.ts",
     "dev": "node ./scripts/run-next-safe.cjs dev",
     "build": "npm run prisma:generate && node ./scripts/run-next-safe.cjs build",
     "start": "node ./scripts/run-next-safe.cjs start",
@@ -21,6 +22,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@openai/agents": "^0.18.0",
     "@prisma/client": "^6.19.2",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-dialog": "^1.1.14",
@@ -38,9 +40,11 @@
     "lucide-react": "^0.511.0",
     "nanoid": "^5.1.5",
     "next": "^14.2.35",
+    "openai": "^7.15.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-hook-form": "^7.65.0",
+    "sharp": "^0.35.4",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.0",
     "zod": "^4.1.11",
@@ -57,6 +61,7 @@
     "postcss": "^8.4.49",
     "prisma": "^6.19.2",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.23.13",
     "typescript": "^5.8.3"
   },
   "build": {

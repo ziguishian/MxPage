@@ -1,0 +1,16 @@
+// Sources and rationale: docs/detail-page-prompt-research.md
+export const creativeRules = `Art direction: create a finished commercial product page with a consistent palette, typography hierarchy, lighting and spacing. Reference photos define PRODUCT IDENTITY, not the final background or layout. Redesign the setting, light, framing and typography to suit the category and positioning. Each section must communicate one distinct purchase-relevant idea. Lead with a strong product portrait and proposition, then vary large lifestyle scenes, feature grids, useful close-ups and confirmed information. Avoid repetitive posters and decorative filler. DETAIL panels must form an edge-to-edge continuous page, without outer card frames, arbitrary margins or mock phone UI.
+Product fidelity: preserve silhouette, proportions, color, packaging, labels and component count from the reference photos. Never infer hidden mechanisms, material composition, dimensions, certifications, efficacy, prices or discounts. Do not fabricate testimonials or comparison results.
+Composition: build a clear focal hierarchy with deliberate product scale, a distinctive palette, controlled light/shadow, tactile materials and precise text zones. A bold color field, graphic sweep, natural scene or sculptural set is welcome when it supports the category. Keep the first product portrait identifiable; secondary detail shots can crop intentionally to source-visible features. Preserve the actual SKU, not the uploaded photograph's framing or background. Do not force every page into a centered cutout on white. Maintain safe margins for text and do not render fake UI.
+Typography: use the exact final copy in the chosen language with clear type hierarchy. One strong headline per panel; information panels can include two to four concise labelled points. Readable at 375px mobile width. No placeholder text, random letters, excessive tiny text, watermarks or invented brand marks. Never render internal uncertainty notes or evidence IDs as selling copy. Inspect generated copy against the requested text, product identity against the references, and style against the rest of the set.`;
+
+const directions: Record<string, string> = {
+  general_ecommerce: "Category-specific commercial art direction: distinctive product-led cover, complementary gallery shots and a varied continuous detail story with clear mobile hierarchy.",
+  taobao_tmall: "Product detail storytelling: clear hero, feature closeups, usage context and confirmed specifications, consistent vertical rhythm.",
+  pinduoduo: "Immediately understandable product benefits, large legible titles, straightforward product presentation. Never invent low prices or promotions.",
+  xiaohongshu: "Lifestyle editorial imagery, natural use context, concise conversational captions. No fabricated personal experiences or endorsements.",
+  douyin_ecommerce: "Fast comprehension on mobile: strong product focus, short headlines and visual demonstrations supported by known facts.",
+};
+export function platformDirection(platform: string) {
+  return `Target platform: ${platform}. Creative direction (not a guarantee of platform compliance): ${directions[platform] || directions.general_ecommerce}`;
+}

@@ -11,6 +11,19 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      opacity: {
+        6: "0.06",
+        8: "0.08",
+        15: "0.15",
+        35: "0.35",
+        45: "0.45",
+        65: "0.65",
+        78: "0.78",
+        82: "0.82",
+        84: "0.84",
+        85: "0.85",
+        88: "0.88",
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
