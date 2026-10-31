@@ -319,3 +319,7 @@ Contributions of all kinds are welcome, including bug reports, feature requests,
 
 If you find MxPage useful, consider giving it a ⭐ on GitHub and sharing it with others.
 
+
+[![Star History Chart](https://api.star-history.com/svg?repos=owner/repo&type=Date)](https://star-history.com/#owner/repo&Date)
+
+
